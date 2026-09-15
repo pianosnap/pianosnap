@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PianoSnap - Learn Fast. Play Now.</title>
+    
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23000'/><path d='M30 25h40v50H30z' fill='%23ffe500'/><path d='M45 25h10v30H45z' fill='%23000'/></svg>">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <!-- Google Fonts: Inter & Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,17 +46,6 @@
             overflow-x: hidden;
         }
 
-        /* Electric Lightning Glow Effects */
-        .yellow-glow {
-            box-shadow: 0 0 25px rgba(255, 229, 0, 0.25);
-        }
-        .yellow-glow-lg {
-            box-shadow: 0 0 50px rgba(255, 229, 0, 0.35);
-        }
-        .text-glow {
-            text-shadow: 0 0 12px rgba(255, 229, 0, 0.6);
-        }
-        
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -64,12 +59,6 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #ffe500;
-        }
-
-        /* Lightning Header Background Overlay */
-        .bg-lightning {
-            background: radial-gradient(circle at 50% 20%, rgba(255, 229, 0, 0.12) 0%, rgba(8, 8, 10, 0.95) 70%),
-                        linear-gradient(to bottom, rgba(8, 8, 10, 0.4), #08080a);
         }
     </style>
 </head>
@@ -90,12 +79,11 @@
                         <span class="font-display font-black text-2xl text-white tracking-wider">PIANO</span>
                         <span class="font-display font-black text-2xl text-snapYellow tracking-wider">SNAP</span>
                     </div>
-                    <!-- English Subtitle as requested -->
                     <span class="text-xs font-semibold text-zinc-400 tracking-widest uppercase">Learn Fast. Play Now.</span>
                 </div>
             </a>
 
-            <!-- Search & Actions -->
+            <!-- Search Bar -->
             <div class="flex items-center gap-3">
                 <div class="relative hidden md:block w-64">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
@@ -109,7 +97,7 @@
     <!-- Main Content Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Focused Single Song View (Dynamic display when a song is clicked or opened via YouTube link) -->
+        <!-- Focused Single Song View -->
         <section id="singleSongSection" class="hidden mb-12">
             <div class="flex items-center justify-between mb-6">
                 <button onclick="showAllSongs()" class="text-sm font-semibold text-zinc-400 hover:text-snapYellow transition flex items-center gap-2 bg-zinc-900/80 px-4 py-2 rounded-full border border-zinc-800">
@@ -117,7 +105,7 @@
                 </button>
                 <button onclick="copyShareLink()" class="text-sm font-semibold text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-full border border-zinc-800 transition flex items-center gap-2">
                     <i class="fa-solid fa-share-nodes text-snapYellow"></i>
-                    <span>Copy YouTube Link</span>
+                    <span>Copy Tutorial Link</span>
                 </button>
             </div>
 
@@ -149,9 +137,8 @@
                             </div>
                         </div>
 
-                        <!-- The Two Download Buttons Required -->
+                        <!-- Download Buttons -->
                         <div class="space-y-3.5">
-                            <!-- Download MIDI Button -->
                             <button onclick="triggerDownloadModal('midi')" class="w-full group relative overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-800 hover:from-snapYellow hover:to-amber-400 text-white hover:text-black font-extrabold py-4 px-6 rounded-2xl border border-zinc-700/80 hover:border-snapYellow transition-all duration-300 flex items-center justify-between shadow-lg">
                                 <div class="flex items-center gap-3.5">
                                     <div class="w-10 h-10 rounded-xl bg-zinc-800 group-hover:bg-black/20 flex items-center justify-center text-snapYellow group-hover:text-black transition">
@@ -165,7 +152,6 @@
                                 <i class="fa-solid fa-download text-lg transform group-hover:translate-y-0.5 transition"></i>
                             </button>
 
-                            <!-- Download Sheet Music Button -->
                             <button onclick="triggerDownloadModal('sheet')" class="w-full group relative overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-800 hover:from-snapYellow hover:to-amber-400 text-white hover:text-black font-extrabold py-4 px-6 rounded-2xl border border-zinc-700/80 hover:border-snapYellow transition-all duration-300 flex items-center justify-between shadow-lg">
                                 <div class="flex items-center gap-3.5">
                                     <div class="w-10 h-10 rounded-xl bg-zinc-800 group-hover:bg-black/20 flex items-center justify-center text-snapYellow group-hover:text-black transition">
@@ -185,7 +171,7 @@
             </div>
         </section>
 
-        <!-- Songs Grid Catalog Header & Controls -->
+        <!-- Catalog Controls -->
         <div id="catalogHeader" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-snapCard/80 p-4 rounded-2xl border border-zinc-800/80">
             <div class="flex items-center gap-3">
                 <h3 class="font-display font-extrabold text-xl text-white flex items-center gap-2">
@@ -197,7 +183,6 @@
                 </span>
             </div>
 
-            <!-- Sorting Controls -->
             <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
                 <div class="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 text-xs text-zinc-300">
                     <i class="fa-solid fa-arrow-down-short-wide text-snapYellow"></i>
@@ -210,9 +195,9 @@
             </div>
         </div>
 
-        <!-- Songs Catalog Grid -->
+        <!-- Songs Grid Catalog -->
         <div id="songsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            <!-- Dynamic Song Cards Injected via JS -->
+            <!-- Dynamic Cards Injected via JS -->
         </div>
 
         <!-- Pagination Controls -->
@@ -231,33 +216,28 @@
 
     </main>
 
-    <!-- EXACT MATCH REQUIRED MODAL: Subscribe to Unlock Popup -->
+    <!-- Subscribe to Unlock Modal -->
     <div id="downloadModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
         <div class="bg-white text-black rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in duration-200">
             
-            <!-- Close Modal Button -->
             <button onclick="closeDownloadModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center transition">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
 
-            <!-- Top Indicator Dot -->
             <div class="mb-6 flex justify-start">
                 <span class="w-3.5 h-3.5 rounded-full bg-black inline-block"></span>
             </div>
 
-            <!-- Bold Title matching user's reference image -->
             <h2 class="font-display font-black text-xl sm:text-2xl text-black tracking-tight leading-snug uppercase mb-8">
                 PLEASE SUPPORT THE ARTIST TO UNLOCK YOUR DOWNLOAD
             </h2>
 
-            <!-- Step 1: Subscribe Button (Red YouTube Style) -->
             <div class="space-y-4">
-                <a id="subscribeLinkBtn" href="https://www.youtube.com/@PianoSnap" target="_blank" onclick="handleSubscribeClick()" class="w-full bg-[#FF0000] hover:bg-[#D60000] text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-md hover:shadow-lg transition text-base sm:text-lg">
+                <a id="subscribeLinkBtn" href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" onclick="handleSubscribeClick()" class="w-full bg-[#FF0000] hover:bg-[#D60000] text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-md hover:shadow-lg transition text-base sm:text-lg">
                     <i class="fa-brands fa-youtube text-2xl"></i>
                     <span>Subscribe To PIANOSNAP</span>
                 </a>
 
-                <!-- Step 2: Next Button (Initially Disabled, unlocks after clicking subscribe) -->
                 <button id="nextDownloadBtn" disabled onclick="executeDownload()" class="w-full bg-zinc-100 text-zinc-400 font-bold py-3.5 px-6 rounded-2xl border border-zinc-200 cursor-not-allowed transition text-base flex items-center justify-center gap-2">
                     <span>Next</span>
                     <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -300,7 +280,7 @@
                 </form>
             </div>
 
-            <!-- Admin Dashboard (After successful login) -->
+            <!-- Admin Dashboard -->
             <div id="adminDashboardView" class="hidden">
                 <div class="flex items-center justify-between pb-6 mb-6 border-b border-zinc-800">
                     <div>
@@ -312,7 +292,6 @@
                     </button>
                 </div>
 
-                <!-- Add/Edit Song Form -->
                 <form onsubmit="saveSong(event)" class="bg-black/60 p-5 rounded-2xl border border-zinc-800 space-y-4 mb-8">
                     <h4 id="formHeaderTitle" class="text-sm font-bold text-snapYellow flex items-center gap-2">
                         <i class="fa-solid fa-plus-circle"></i> Add New Song
@@ -337,7 +316,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-zinc-400 mb-1">MIDI File Link / Note (Optional)</label>
+                            <label class="block text-xs font-semibold text-zinc-400 mb-1">MIDI File Link (Optional)</label>
                             <input type="text" id="inputMidiUrl" placeholder="Direct URL or leave empty for auto MIDI generator" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow">
                         </div>
                         <div>
@@ -356,7 +335,6 @@
                     </div>
                 </form>
 
-                <!-- Current Songs List -->
                 <h4 class="text-sm font-bold text-white mb-3">Existing Songs (<span id="adminSongCount">0</span>)</h4>
                 <div id="adminSongList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
                     <!-- Dynamic List -->
@@ -372,6 +350,7 @@
         <div id="toastMessage" class="text-sm font-medium">Notification message</div>
     </div>
 
+    <!-- Footer -->
     <footer class="border-t border-zinc-800/80 bg-black/60 py-8 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
             <div class="flex items-center gap-2">
@@ -379,7 +358,7 @@
                 <span>&copy; 2026 PianoSnap. All rights reserved.</span>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://www.youtube.com/@PianoSnap" target="_blank" class="hover:text-snapYellow transition flex items-center gap-1.5">
+                <a href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" class="hover:text-snapYellow transition flex items-center gap-1.5">
                     <i class="fa-brands fa-youtube text-red-500 text-sm"></i> YouTube Channel
                 </a>
             </div>
@@ -387,7 +366,6 @@
     </footer>
 
     <script>
-        // Initial Seed Songs Dataset (3 Example Piano Tutorials)
         const DEFAULT_SONGS = [
             {
                 id: 'interstellar-main-theme',
@@ -418,27 +396,23 @@
             }
         ];
 
-        // Global State
         let songs = [];
         let currentSong = null;
-        let selectedFileType = null; // 'midi' or 'sheet'
+        let selectedFileType = null;
         let hasClickedSubscribe = false;
         let isAdminLoggedIn = false;
 
-        // Pagination & Sorting State
         let currentPage = 1;
         const SONGS_PER_PAGE = 30;
-        let currentSortOrder = 'newest'; // 'newest' | 'oldest'
+        let currentSortOrder = 'newest';
         let currentSearchQuery = '';
 
-        // Initialize Application
         window.onload = function() {
             loadSongsFromStorage();
             checkUrlParameters();
             renderCatalog();
         };
 
-        // Load or Initialize Songs
         function loadSongsFromStorage() {
             const stored = localStorage.getItem('pianosnap_songs');
             if (stored) {
@@ -457,7 +431,6 @@
                 saveSongsToStorage();
             }
 
-            // Ensure every song has a timestamp for sorting
             songs.forEach((song, idx) => {
                 if (!song.createdAt) {
                     song.createdAt = Date.now() - (songs.length - idx) * 1000;
@@ -469,22 +442,19 @@
             localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
         }
 
-        // Helper to extract YouTube ID
         function getYoutubeId(url) {
             if (!url) return 'BYL30114i-U';
-            if (url.length === 11 && !url.includes('/')) return url; // Already an ID
+            if (url.length === 11 && !url.includes('/')) return url;
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : 'BYL30114i-U';
         }
 
-        // Check deep-linking URL parameters (?song=id, ?v=youtube_id, or /admin or ?admin)
         function checkUrlParameters() {
             const urlParams = new URLSearchParams(window.location.search);
             const songId = urlParams.get('song');
             const videoId = urlParams.get('v');
 
-            // Admin URL Detection (/admin, #admin, or ?admin)
             if (window.location.pathname.endsWith('/admin') || window.location.hash === '#admin' || urlParams.has('admin')) {
                 openAdminModal();
             }
@@ -507,28 +477,24 @@
             showAllSongs();
         }
 
-        // Handle Sort Option Change
         function handleSortChange(order) {
             currentSortOrder = order;
             currentPage = 1;
             renderCatalog();
         }
 
-        // Search Handler
         function handleSearch(query) {
             currentSearchQuery = query.toLowerCase().trim();
             currentPage = 1;
             renderCatalog();
         }
 
-        // Render Catalog Cards with Pagination & Sorting
         function renderCatalog() {
             const grid = document.getElementById('songsGrid');
             const countBadge = document.getElementById('songCountBadge');
             const emptyState = document.getElementById('emptyCatalog');
             const paginationContainer = document.getElementById('paginationControls');
 
-            // 1. Filter songs
             let filtered = songs;
             if (currentSearchQuery) {
                 filtered = songs.filter(s => 
@@ -537,14 +503,12 @@
                 );
             }
 
-            // 2. Sort songs
             filtered = [...filtered].sort((a, b) => {
                 const timeA = a.createdAt || 0;
                 const timeB = b.createdAt || 0;
                 return currentSortOrder === 'newest' ? timeB - timeA : timeA - timeB;
             });
 
-            // 3. Update total count badge
             const totalCount = filtered.length;
             countBadge.innerText = `${totalCount} ${totalCount === 1 ? 'Total Song' : 'Total Songs'}`;
 
@@ -557,7 +521,6 @@
                 emptyState.classList.add('hidden');
             }
 
-            // 4. Calculate pagination slice
             const totalPages = Math.ceil(totalCount / SONGS_PER_PAGE);
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
@@ -566,7 +529,6 @@
             const endIndex = startIndex + SONGS_PER_PAGE;
             const pageSongs = filtered.slice(startIndex, endIndex);
 
-            // 5. Render page songs
             grid.innerHTML = '';
             pageSongs.forEach(song => {
                 const ytId = getYoutubeId(song.youtubeUrl);
@@ -576,7 +538,6 @@
                 card.className = 'bg-snapCard rounded-2xl border border-zinc-800/80 overflow-hidden hover:border-snapYellow/80 transition-all duration-300 group flex flex-col justify-between shadow-lg hover:shadow-2xl';
                 card.innerHTML = `
                     <div>
-                        <!-- Thumbnail Preview -->
                         <div class="relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer" onclick="selectSong('${song.id}')">
                             <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/111/ffe500?text=PianoSnap'">
                             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -586,14 +547,12 @@
                             </div>
                         </div>
 
-                        <!-- Card Content -->
                         <div class="p-5">
                             <h4 class="font-display font-bold text-lg text-white group-hover:text-snapYellow transition-colors line-clamp-1 mb-1">${song.title}</h4>
                             <p class="text-xs text-zinc-400 line-clamp-1 mb-4">${song.artist}</p>
                         </div>
                     </div>
 
-                    <!-- Card Action Button: Strict 'DOWNLOAD' text -->
                     <div class="px-5 pb-5 pt-0 flex items-center gap-2">
                         <button onclick="selectSong('${song.id}')" class="flex-1 bg-snapYellow hover:bg-snapYellowDark text-black font-extrabold text-xs py-3 px-4 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg uppercase tracking-wider">
                             <i class="fa-solid fa-download"></i> DOWNLOAD
@@ -603,11 +562,9 @@
                 grid.appendChild(card);
             });
 
-            // 6. Render pagination controls
             renderPagination(totalPages);
         }
 
-        // Render Pagination UI
         function renderPagination(totalPages) {
             const container = document.getElementById('paginationControls');
             if (totalPages <= 1) {
@@ -618,7 +575,6 @@
             container.classList.remove('hidden');
             let html = '';
 
-            // Previous Button
             html += `
                 <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} 
                     class="px-4 py-2 rounded-xl text-xs font-bold border transition ${currentPage === 1 ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800/50 cursor-not-allowed' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:text-snapYellow'} flex items-center gap-1.5">
@@ -626,7 +582,6 @@
                 </button>
             `;
 
-            // Page numbers
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
                     const isActive = i === currentPage;
@@ -641,7 +596,6 @@
                 }
             }
 
-            // Next Button
             html += `
                 <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} 
                     class="px-4 py-2 rounded-xl text-xs font-bold border transition ${currentPage === totalPages ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800/50 cursor-not-allowed' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:text-snapYellow'} flex items-center gap-1.5">
@@ -658,7 +612,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Select a Specific Song (Deep link mode)
         function selectSong(id, updateUrl = true) {
             const song = songs.find(s => s.id === id);
             if (!song) return;
@@ -673,33 +626,28 @@
                         window.history.pushState({path: url.href}, '', url.toString());
                     }
                 } catch(e) {
-                    console.warn('PushState disabled in sandboxed/blob frame:', e);
+                    console.warn('PushState ignored in preview frame:', e);
                 }
             }
 
-            // Populate Single Song Section
             document.getElementById('songTitle').innerText = song.title;
             document.getElementById('songArtist').innerText = song.artist;
             
             const ytId = getYoutubeId(song.youtubeUrl);
             document.getElementById('youtubeIframe').src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
 
-            // UI Adjustments
             document.getElementById('singleSongSection').classList.remove('hidden');
             document.getElementById('catalogTitle').innerText = 'More Tutorials';
 
-            // Scroll to top smoothly
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Reset to Show All Songs
         function showAllSongs() {
             currentSong = null;
             document.getElementById('singleSongSection').classList.add('hidden');
             document.getElementById('catalogTitle').innerText = 'Song Catalog';
             document.getElementById('youtubeIframe').src = '';
             
-            // Clean URL safely
             try {
                 if (!window.location.href.startsWith('blob:')) {
                     const url = new URL(window.location.href);
@@ -708,13 +656,12 @@
                     window.history.pushState({path: url.href}, '', url.toString());
                 }
             } catch(e) {
-                console.warn('PushState disabled in sandboxed/blob frame:', e);
+                console.warn('PushState ignored in preview frame:', e);
             }
 
             renderCatalog();
         }
 
-        // Copy Share Link for YouTube Description
         function copyShareLink() {
             if (!currentSong) return;
             let shareUrl = window.location.href;
@@ -730,7 +677,6 @@
                 }
             }
             
-            // Clipboard Copy
             const tempInput = document.createElement('input');
             document.body.appendChild(tempInput);
             tempInput.value = shareUrl;
@@ -741,19 +687,14 @@
             showToast('Link copied to clipboard! Paste it under your YouTube video.', 'fa-link');
         }
 
-        // ==========================================
-        // DOWNLOAD MODAL & SUBSCRIBE UNLOCK FLOW
-        // ==========================================
         function triggerDownloadModal(fileType) {
             selectedFileType = fileType;
             hasClickedSubscribe = false;
 
-            // Reset Modal Buttons
             const nextBtn = document.getElementById('nextDownloadBtn');
             nextBtn.disabled = true;
             nextBtn.className = "w-full bg-zinc-100 text-zinc-400 font-bold py-3.5 px-6 rounded-2xl border border-zinc-200 cursor-not-allowed transition text-base flex items-center justify-center gap-2";
 
-            // Show Modal
             document.getElementById('downloadModal').classList.remove('hidden');
         }
 
@@ -761,11 +702,9 @@
             document.getElementById('downloadModal').classList.add('hidden');
         }
 
-        // Triggered when user clicks "Subscribe to PianoSnap"
         function handleSubscribeClick() {
             hasClickedSubscribe = true;
 
-            // Activate Next Button immediately after click
             setTimeout(() => {
                 const nextBtn = document.getElementById('nextDownloadBtn');
                 nextBtn.disabled = false;
@@ -773,7 +712,6 @@
             }, 500);
         }
 
-        // Execute Download File
         function executeDownload() {
             if (!currentSong) return;
 
@@ -785,7 +723,6 @@
             const fileName = `${currentSong.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_PianoSnap${fileExtension}`;
 
             if (fileUrl && fileUrl.startsWith('http')) {
-                // Direct file link
                 const a = document.createElement('a');
                 a.href = fileUrl;
                 a.target = '_blank';
@@ -794,8 +731,7 @@
                 a.click();
                 document.body.removeChild(a);
             } else {
-                // Synthesize dummy download file so the button always works for demo songs!
-                const content = `PianoSnap Official ${isMidi ? 'MIDI File' : 'Sheet Music Score'}\n\nSong: ${currentSong.title}\nArtist: ${currentSong.artist}\nWebsite: https://www.youtube.com/@PianoSnap\n\nThank you for subscribing to PianoSnap!`;
+                const content = `PianoSnap Official ${isMidi ? 'MIDI File' : 'Sheet Music Score'}\n\nSong: ${currentSong.title}\nArtist: ${currentSong.artist}\nWebsite: https://www.youtube.com/@PianoSnap?sub_confirmation=1\n\nThank you for subscribing to PianoSnap!`;
                 const blob = new Blob([content], { type: isMidi ? 'audio/midi' : 'application/pdf' });
                 const blobUrl = URL.createObjectURL(blob);
                 
@@ -811,9 +747,6 @@
             showToast(`Downloading ${isMidi ? 'MIDI arrangement' : 'Sheet Music PDF'}...`, 'fa-circle-down');
         }
 
-        // ==========================================
-        // ADMIN PANEL & SONG MANAGEMENT
-        // ==========================================
         function openAdminModal() {
             document.getElementById('adminModal').classList.remove('hidden');
             if (isAdminLoggedIn) {
@@ -890,7 +823,6 @@
             const sheetUrl = document.getElementById('inputSheetUrl').value.trim();
 
             if (editId) {
-                // Edit existing
                 const index = songs.findIndex(s => s.id === editId);
                 if (index !== -1) {
                     songs[index] = { 
@@ -904,7 +836,6 @@
                     showToast('Song updated successfully!', 'fa-pen-to-square');
                 }
             } else {
-                // Create new
                 const newId = title.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now().toString().slice(-4);
                 songs.unshift({ 
                     id: newId, 
@@ -956,7 +887,6 @@
             document.getElementById('formHeaderTitle').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add New Song';
         }
 
-        // Toast Notification System
         function showToast(msg, icon = 'fa-circle-check') {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
