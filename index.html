@@ -132,16 +132,15 @@
                                     <i class="fa-solid fa-compact-disc"></i> Selected Song
                                 </div>
                                 <h2 id="songTitle" class="font-display font-extrabold text-2xl sm:text-3xl text-white mb-2 leading-tight">--</h2>
-                                <p id="songArtist" class="text-zinc-400 font-medium text-base mb-6">--</p>
+                                <p id="songArtist" class="text-zinc-400 font-medium text-base mb-4">--</p>
                                 
-                                <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800/80 mb-6 text-xs text-zinc-400 space-y-2">
-                                    <div class="flex items-center justify-between text-zinc-300 font-semibold text-sm">
-                                        <span>Download Options</span>
-                                        <span class="text-emerald-400 font-bold flex items-center gap-1">
-                                            <i class="fa-solid fa-check-circle text-xs"></i> Verified Free
-                                        </span>
+                                <div class="mb-6">
+                                    <div class="text-2xl sm:text-3xl font-black text-emerald-400 tracking-wider mb-2 flex items-center gap-2">
+                                        FREE
                                     </div>
-                                    <p>Unlock both official MIDI arrangement and high-resolution Printable Sheet Music directly below.</p>
+                                    <p class="text-xs text-zinc-400 leading-relaxed">
+                                        All arrangements and MIDI files on this site are created by PianoSnap and provided for free. Intended for personal and educational use only. Reselling or commercial redistribution is strictly prohibited. Enjoy playing, and happy practice!
+                                    </p>
                                 </div>
                             </div>
 
@@ -150,7 +149,7 @@
                                 <button onclick="triggerDownloadModal('midi')" class="w-full group relative overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-800 hover:from-snapYellow hover:to-amber-400 text-white hover:text-black font-extrabold py-4 px-6 rounded-2xl border border-zinc-700/80 hover:border-snapYellow transition-all duration-300 flex items-center justify-between shadow-lg">
                                     <div class="flex items-center gap-3.5">
                                         <div class="w-10 h-10 rounded-xl bg-zinc-800 group-hover:bg-black/20 flex items-center justify-center text-snapYellow group-hover:text-black transition">
-                                            <i class="fa-solid fa-sliders text-lg"></i>
+                                            <i class="fa-solid fa-music text-lg"></i>
                                         </div>
                                         <div class="text-left">
                                             <div class="text-sm tracking-wide font-black uppercase">Download MIDI</div>
@@ -180,7 +179,7 @@
             </section>
 
             <!-- Catalog Controls -->
-            <div id="catalogHeader" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-snapCard/80 p-4 rounded-2xl border border-zinc-800/80">
+            <div id="catalogHeader" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-snapCard/80 p-4 rounded-2xl border border-zinc-800/80">
                 <div class="flex items-center gap-3">
                     <h3 class="font-display font-extrabold text-xl text-white flex items-center gap-2">
                         <i class="fa-solid fa-music text-snapYellow"></i>
@@ -201,6 +200,21 @@
                         </select>
                     </div>
                 </div>
+            </div>
+
+            <!-- Notice: Subscribe to YouTube channel -->
+            <div class="mb-6 p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-600/10 border border-red-500/20 text-red-500 flex items-center justify-center text-lg shrink-0">
+                        <i class="fa-brands fa-youtube"></i>
+                    </div>
+                    <p class="text-sm font-semibold text-zinc-200">
+                        Subscribe to the PianoSnap YouTube channel to download free MIDI files and sheet music.
+                    </p>
+                </div>
+                <a href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="self-start sm:self-auto px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow shadow-red-600/20 active:scale-95">
+                    <i class="fa-brands fa-youtube"></i> Subscribe
+                </a>
             </div>
 
             <!-- Songs Grid Catalog -->
@@ -226,13 +240,25 @@
 
         <!-- Footer -->
         <footer class="border-t border-zinc-800/80 bg-black/60 py-8 mt-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
                 <div class="flex items-center gap-2">
                     <span class="font-display font-black text-white">PIANO<span class="text-snapYellow">SNAP</span></span>
                     <span>&copy; 2026 PianoSnap. All rights reserved.</span>
                 </div>
+
+                <div class="flex items-center gap-4 flex-wrap justify-center text-zinc-400">
+                    <button onclick="openPrivacyPolicyModal()" class="hover:text-snapYellow transition">Privacy Policy</button>
+                    <span class="text-zinc-700">&bull;</span>
+                    <button onclick="openCookiePolicyModal()" class="hover:text-snapYellow transition">Cookie Policy</button>
+                    <span class="text-zinc-700">&bull;</span>
+                    <button onclick="openCookieBanner(true)" class="hover:text-snapYellow transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-cookie-bite text-snapYellow"></i>
+                        <span>Cookie Preferences</span>
+                    </button>
+                </div>
+
                 <div class="flex items-center gap-4">
-                    <a href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" class="hover:text-snapYellow transition flex items-center gap-1.5">
+                    <a href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="hover:text-snapYellow transition flex items-center gap-1.5">
                         <i class="fa-brands fa-youtube text-red-500 text-sm"></i> YouTube Channel
                     </a>
                 </div>
@@ -511,6 +537,16 @@
                                 <!-- Dynamic List Injected via JS -->
                             </div>
 
+                            <!-- Admin Pagination Controls -->
+                            <div id="adminPaginationControls" class="mt-4 pt-3 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-400">
+                                <div id="adminPaginationInfo" class="font-medium">
+                                    Mostrando 0 canzoni
+                                </div>
+                                <div id="adminPaginationButtons" class="flex items-center gap-1.5 self-end sm:self-auto">
+                                    <!-- Dynamic Admin Pagination Buttons -->
+                                </div>
+                            </div>
+
                             <!-- Empty Search in Admin -->
                             <div id="adminEmptySearch" class="hidden text-center py-12 text-zinc-500 text-xs">
                                 <i class="fa-solid fa-circle-question text-2xl mb-2 block"></i>
@@ -611,6 +647,196 @@
         <div id="toastMessage" class="text-sm font-medium">Notifica</div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- COOKIE & PRIVACY BANNER                    -->
+    <!-- ========================================== -->
+    <div id="cookieConsentBanner" class="fixed bottom-0 inset-x-0 z-50 p-4 sm:p-5 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-800 shadow-2xl transition-all duration-300 hidden">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1.5 max-w-3xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-snapYellow/10 border border-snapYellow/30 text-snapYellow flex items-center justify-center shrink-0 text-sm">
+                        <i class="fa-solid fa-cookie-bite"></i>
+                    </span>
+                    <h4 class="text-sm font-bold text-white tracking-wide">Cookie & Privacy Notice</h4>
+                </div>
+                <p class="text-xs text-zinc-300 leading-relaxed">
+                    PianoSnap uses essential technical cookies required for the site to work properly, and third-party embeds (YouTube for interactive piano tutorial previews). You can choose to accept all cookies or continue with necessary technical cookies only. You can read our 
+                    <button type="button" onclick="openCookiePolicyModal()" class="text-snapYellow underline hover:text-white transition font-medium">Cookie Policy</button> and 
+                    <button type="button" onclick="openPrivacyPolicyModal()" class="text-snapYellow underline hover:text-white transition font-medium">Privacy Policy</button> anytime.
+                </p>
+            </div>
+            <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap shrink-0 w-full md:w-auto">
+                <button type="button" onclick="handleCookieConsent('necessary')" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-bold text-xs transition active:scale-95 whitespace-nowrap">
+                    Essential Only
+                </button>
+                <button type="button" onclick="handleCookieConsent('all')" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-snapYellow hover:bg-snapYellowDark text-black font-extrabold text-xs transition shadow-md active:scale-95 whitespace-nowrap">
+                    Accept All
+                </button>
+                <button type="button" onclick="handleCookieConsent('necessary')" title="Close and continue with essential only" class="text-zinc-500 hover:text-white p-2 rounded-xl border border-transparent hover:border-zinc-800 transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- COOKIE POLICY MODAL                        -->
+    <!-- ========================================== -->
+    <div id="cookiePolicyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm hidden p-4">
+        <div class="bg-zinc-900 text-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-zinc-800 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-snapYellow/10 text-snapYellow border border-snapYellow/30 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-cookie-bite"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-extrabold text-lg text-white">Cookie Policy</h3>
+                        <p class="text-xs text-zinc-400">Information about how cookies and local storage are used on PianoSnap</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCookiePolicyModal()" class="text-zinc-400 hover:text-white w-9 h-9 rounded-xl flex items-center justify-center border border-zinc-800 hover:border-zinc-700 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4 text-xs text-zinc-300 leading-relaxed pr-3">
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-snapYellow"></i> 1. What Are Cookies
+                    </h4>
+                    <p>
+                        Cookies and local storage items are small pieces of data stored on your device (computer, tablet, or mobile phone) when you visit websites. They help the site recognize your device and remember your preferences or session state.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i> 2. Strictly Necessary Technical Cookies
+                    </h4>
+                    <p class="mb-2">
+                        These cookies and storage items are essential for the site to function properly, remember your consent preferences, and authenticate administration sessions:
+                    </p>
+                    <ul class="list-disc pl-5 space-y-1 text-zinc-400">
+                        <li><strong class="text-zinc-200">pianosnap_cookie_consent:</strong> remembers your cookie choice so you don't see the banner repeatedly.</li>
+                        <li><strong class="text-zinc-200">ps_admin_token:</strong> temporary session token for administrative management.</li>
+                        <li><strong class="text-zinc-200">pianosnap_songs:</strong> local browser cache used to provide fast, instantaneous song catalog loading.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-brands fa-youtube text-red-500"></i> 3. Third-Party Content (YouTube)
+                    </h4>
+                    <p>
+                        PianoSnap embeds official YouTube video players to allow visitors to preview piano tutorials and listen to arrangements. When viewing embedded videos, YouTube / Google may set cookies or collect anonymous telemetry according to their privacy policy. You can block third-party cookies at any time via your browser settings.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-snapYellow"></i> 4. Managing Your Preferences
+                    </h4>
+                    <p class="mb-3">
+                        You can change or reset your cookie preferences at any time by clicking the button below or using the "Cookie Preferences" link in the footer.
+                    </p>
+                    <button type="button" onclick="resetCookiePreferences()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-snapYellow font-bold rounded-xl border border-zinc-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left text-xs"></i>
+                        <span>Reset Cookie Preferences</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-zinc-800 flex justify-end">
+                <button type="button" onclick="closeCookiePolicyModal()" class="px-5 py-2.5 bg-snapYellow hover:bg-snapYellowDark text-black font-bold text-xs rounded-xl transition">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PRIVACY POLICY MODAL                       -->
+    <!-- ========================================== -->
+    <div id="privacyPolicyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm hidden p-4">
+        <div class="bg-zinc-900 text-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-zinc-800 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div class="p-6 border-b border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-snapYellow/10 text-snapYellow border border-snapYellow/30 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-extrabold text-lg text-white">Privacy Policy</h3>
+                        <p class="text-xs text-zinc-400">How PianoSnap collects, uses, and protects your information</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closePrivacyPolicyModal()" class="text-zinc-400 hover:text-white w-9 h-9 rounded-xl flex items-center justify-center border border-zinc-800 hover:border-zinc-700 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-4 text-xs text-zinc-300 leading-relaxed pr-3">
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-snapYellow"></i> 1. Contact & Data Controller
+                    </h4>
+                    <p>
+                        PianoSnap is committed to respecting user privacy. For any inquiries, feedback, or data requests, please contact us at: <a href="mailto:pianosnap.yt@gmail.com" class="text-snapYellow underline font-mono">pianosnap.yt@gmail.com</a>.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-database text-snapYellow"></i> 2. Information We Collect
+                    </h4>
+                    <p>
+                        PianoSnap is a free-access platform offering piano arrangements, MIDI files, and sheet music. We do not require regular users to create an account or provide personal information to browse or download. We only collect:
+                    </p>
+                    <ul class="list-disc pl-5 mt-1.5 space-y-1 text-zinc-400">
+                        <li>Basic technical network logs (standard server logs including anonymous IP address, browser type, timestamp) to prevent abuse and ensure security.</li>
+                        <li>Local client-side configuration (such as your cookie preferences and song cache) stored solely on your own browser.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced text-snapYellow"></i> 3. Purpose of Processing
+                    </h4>
+                    <p>
+                        Data is used exclusively to:
+                    </p>
+                    <ul class="list-disc pl-5 mt-1.5 space-y-1 text-zinc-400">
+                        <li>Provide you with fast catalog access, audio/video previews, and download links.</li>
+                        <li>Ensure technical security, network stability, and protection against automated attacks.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-server text-snapYellow"></i> 4. Storage & Security
+                    </h4>
+                    <p>
+                        Catalog metadata is hosted on Google Cloud Firestore with enterprise-grade encryption in transit (SSL/TLS) and at rest. No personal profiles, passwords, or payment cards are stored on our servers.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-id-card text-snapYellow"></i> 5. Your Rights
+                    </h4>
+                    <p>
+                        You have the right to request clarification regarding any data processed, to request deletion of cached records, and to manage your browser storage and cookies at any time. For questions, contact <strong class="text-zinc-200 font-mono">pianosnap.yt@gmail.com</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-zinc-800 flex justify-end">
+                <button type="button" onclick="closePrivacyPolicyModal()" class="px-5 py-2.5 bg-snapYellow hover:bg-snapYellowDark text-black font-bold text-xs rounded-xl transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- ========================================== -->
     <!-- APPLICATION LOGIC & ROUTING                -->
@@ -686,6 +912,7 @@
         const PIANO_THUMB_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225' fill='%23121216'%3E%3Crect width='400' height='225' fill='%23121216'/%3E%3Ccircle cx='200' cy='100' r='32' fill='%23ffe500'/%3E%3Cpolygon points='194,86 214,100 194,114' fill='%23000'/%3E%3Ctext x='200' y='160' fill='%23ffe500' font-family='sans-serif' font-size='16' font-weight='bold' text-anchor='middle'%3EPIANOSNAP%3C/text%3E%3C/svg%3E";
 
         // State variables
+        let isInitialLoading = true;
         let songs = [];
         let currentSong = null;
         let selectedFileType = null;
@@ -699,6 +926,8 @@
         // Admin State
         let adminToken = sessionStorage.getItem('ps_admin_token') || null;
         let adminFilterQuery = '';
+        let adminCurrentPage = 1;
+        const ADMIN_SONGS_PER_PAGE = 30;
 
         // Startup
         if (document.readyState === 'loading') {
@@ -714,9 +943,81 @@
         });
 
         async function initApp() {
-            await fetchSongs();
+            checkCookieConsent();
+            // Show initial loading state in catalog while waiting for Firestore
+            renderCatalog();
             checkRoute();
             initFirestoreListener();
+        }
+
+        // ==========================================
+        // GDPR COOKIE BANNER & POLICY HANDLERS
+        // ==========================================
+        function checkCookieConsent() {
+            try {
+                const consent = localStorage.getItem('pianosnap_cookie_consent');
+                const banner = document.getElementById('cookieConsentBanner');
+                if (!banner) return;
+                if (!consent) {
+                    banner.classList.remove('hidden');
+                } else {
+                    banner.classList.add('hidden');
+                }
+            } catch (e) {
+                console.warn('Could not read cookie consent:', e);
+            }
+        }
+
+        function handleCookieConsent(type) {
+            try {
+                localStorage.setItem('pianosnap_cookie_consent', JSON.stringify({
+                    choice: type,
+                    timestamp: new Date().toISOString()
+                }));
+            } catch (e) {
+                console.warn('Could not save cookie consent:', e);
+            }
+            const banner = document.getElementById('cookieConsentBanner');
+            if (banner) {
+                banner.classList.add('hidden');
+            }
+            showToast('Cookie preferences saved.', 'fa-cookie-bite');
+        }
+
+        function openCookieBanner(force = false) {
+            const banner = document.getElementById('cookieConsentBanner');
+            if (banner) {
+                banner.classList.remove('hidden');
+            }
+        }
+
+        function resetCookiePreferences() {
+            try {
+                localStorage.removeItem('pianosnap_cookie_consent');
+            } catch (e) {}
+            closeCookiePolicyModal();
+            openCookieBanner(true);
+            showToast('Cookie preferences reset.', 'fa-rotate-left');
+        }
+
+        function openCookiePolicyModal() {
+            const modal = document.getElementById('cookiePolicyModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeCookiePolicyModal() {
+            const modal = document.getElementById('cookiePolicyModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function openPrivacyPolicyModal() {
+            const modal = document.getElementById('privacyPolicyModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closePrivacyPolicyModal() {
+            const modal = document.getElementById('privacyPolicyModal');
+            if (modal) modal.classList.add('hidden');
         }
 
         // ==========================================
@@ -799,38 +1100,36 @@
         // ==========================================
         // DATA SYNC WITH CLOUD FIRESTORE & LOCAL STORAGE
         // ==========================================
-        async function fetchSongs() {
-            // First load from localStorage for instantaneous first render
-            const stored = localStorage.getItem('pianosnap_songs');
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        songs = parsed.map(s => {
-                            if (s && s.youtubeUrl && s.youtubeUrl.includes('BYL30114i-U')) {
-                                return { ...s, youtubeUrl: 'https://www.youtube.com/watch?v=45DGFR0Gv4Y' };
-                            }
-                            return s;
-                        });
-                    }
-                } catch(e) {
-                    console.error('Error reading localStorage songs:', e);
-                }
-            }
-            if (!songs || songs.length === 0) {
-                songs = [...DEFAULT_SONGS];
-            }
-
-            renderCatalog();
-            if (adminToken) {
-                renderAdminDashboardData();
-            }
-        }
-
         function initFirestoreListener() {
             try {
                 const songsCol = collection(db, 'songs');
+
+                // Fallback timeout in case Firestore is unreachable (e.g. offline preview)
+                const offlineFallbackTimer = setTimeout(() => {
+                    if (isInitialLoading) {
+                        console.warn("Firestore listener pending, loading cached or default songs...");
+                        isInitialLoading = false;
+                        const stored = localStorage.getItem('pianosnap_songs');
+                        if (stored) {
+                            try {
+                                const parsed = JSON.parse(stored);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    songs = parsed;
+                                }
+                            } catch (e) {}
+                        }
+                        if (!songs || songs.length === 0) {
+                            songs = [...DEFAULT_SONGS];
+                        }
+                        renderCatalog();
+                        if (adminToken) renderAdminDashboardData();
+                    }
+                }, 3500);
+
                 onSnapshot(songsCol, async (snapshot) => {
+                    clearTimeout(offlineFallbackTimer);
+                    isInitialLoading = false;
+
                     if (snapshot.empty) {
                         console.log("Firestore collection empty, seeding initial default songs...");
                         try {
@@ -839,6 +1138,9 @@
                             }
                         } catch(err) {
                             console.warn("Could not seed initial songs into Firestore:", err);
+                            songs = [...DEFAULT_SONGS];
+                            renderCatalog();
+                            if (adminToken) renderAdminDashboardData();
                         }
                         return;
                     }
@@ -869,10 +1171,28 @@
                         dbStatus.innerText = `Database Cloud Firebase Attivo (${songs.length} canzoni live)`;
                     }
                 }, (error) => {
+                    clearTimeout(offlineFallbackTimer);
                     console.warn("Firestore onSnapshot error:", error);
+                    isInitialLoading = false;
+                    const stored = localStorage.getItem('pianosnap_songs');
+                    if (stored) {
+                        try {
+                            const parsed = JSON.parse(stored);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                songs = parsed;
+                            }
+                        } catch (e) {}
+                    }
+                    if (!songs || songs.length === 0) {
+                        songs = [...DEFAULT_SONGS];
+                    }
+                    renderCatalog();
+                    if (adminToken) renderAdminDashboardData();
                 });
             } catch (err) {
                 console.error("Failed to initialize Firestore listener:", err);
+                isInitialLoading = false;
+                renderCatalog();
             }
         }
 
@@ -1063,12 +1383,16 @@
 
         function handleAdminSearch(query) {
             adminFilterQuery = query.toLowerCase().trim();
+            adminCurrentPage = 1;
             renderAdminSongList();
         }
 
         function renderAdminSongList() {
             const container = document.getElementById('adminSongListContainer');
             const emptyNotice = document.getElementById('adminEmptySearch');
+            const paginationContainer = document.getElementById('adminPaginationControls');
+            const paginationInfo = document.getElementById('adminPaginationInfo');
+            const paginationButtons = document.getElementById('adminPaginationButtons');
 
             let list = songs;
             if (adminFilterQuery) {
@@ -1078,16 +1402,26 @@
                 );
             }
 
-            if (list.length === 0) {
+            const totalCount = list.length;
+            if (totalCount === 0) {
                 container.innerHTML = '';
                 emptyNotice.classList.remove('hidden');
+                if (paginationContainer) paginationContainer.classList.add('hidden');
                 return;
             } else {
                 emptyNotice.classList.add('hidden');
             }
 
+            const totalPages = Math.ceil(totalCount / ADMIN_SONGS_PER_PAGE) || 1;
+            if (adminCurrentPage > totalPages) adminCurrentPage = totalPages;
+            if (adminCurrentPage < 1) adminCurrentPage = 1;
+
+            const startIndex = (adminCurrentPage - 1) * ADMIN_SONGS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ADMIN_SONGS_PER_PAGE, totalCount);
+            const pageSongs = list.slice(startIndex, endIndex);
+
             container.innerHTML = '';
-            list.forEach(song => {
+            pageSongs.forEach(song => {
                 const ytId = getYoutubeId(song.youtubeUrl);
                 const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
                 const hasMidi = Boolean(song.midiUrl && song.midiUrl.trim());
@@ -1135,6 +1469,57 @@
                 `;
                 container.appendChild(item);
             });
+
+            // Render Admin Pagination Controls
+            if (paginationContainer) {
+                paginationContainer.classList.remove('hidden');
+                if (totalPages <= 1) {
+                    if (paginationInfo) paginationInfo.innerText = `Mostrando ${totalCount} ${totalCount === 1 ? 'canzone' : 'canzoni'}`;
+                    if (paginationButtons) paginationButtons.innerHTML = '';
+                } else {
+                    if (paginationInfo) {
+                        paginationInfo.innerText = `Mostrando ${startIndex + 1}-${endIndex} di ${totalCount} canzoni • Pagina ${adminCurrentPage} di ${totalPages}`;
+                    }
+                    if (paginationButtons) {
+                        let btnHtml = `
+                            <button type="button" onclick="goToAdminPage(${adminCurrentPage - 1})" ${adminCurrentPage === 1 ? 'disabled' : ''} 
+                                class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${adminCurrentPage === 1 ? 'bg-zinc-900/40 text-zinc-600 border-zinc-800/40 cursor-not-allowed' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:text-snapYellow'} flex items-center gap-1">
+                                <i class="fa-solid fa-chevron-left text-[10px]"></i> Prec
+                            </button>
+                        `;
+
+                        for (let i = 1; i <= totalPages; i++) {
+                            if (i === 1 || i === totalPages || (i >= adminCurrentPage - 1 && i <= adminCurrentPage + 1)) {
+                                const isActive = i === adminCurrentPage;
+                                btnHtml += `
+                                    <button type="button" onclick="goToAdminPage(${i})" class="w-7 h-7 rounded-lg text-xs font-bold transition border ${isActive ? 'bg-snapYellow text-black border-snapYellow' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border-zinc-800 hover:text-white'}">
+                                        ${i}
+                                    </button>
+                                `;
+                            } else if (i === adminCurrentPage - 2 || i === adminCurrentPage + 2) {
+                                btnHtml += `<span class="text-zinc-600 font-bold text-xs px-0.5">...</span>`;
+                            }
+                        }
+
+                        btnHtml += `
+                            <button type="button" onclick="goToAdminPage(${adminCurrentPage + 1})" ${adminCurrentPage === totalPages ? 'disabled' : ''} 
+                                class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${adminCurrentPage === totalPages ? 'bg-zinc-900/40 text-zinc-600 border-zinc-800/40 cursor-not-allowed' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:text-snapYellow'} flex items-center gap-1">
+                                Succ <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </button>
+                        `;
+                        paginationButtons.innerHTML = btnHtml;
+                    }
+                }
+            }
+        }
+
+        function goToAdminPage(page) {
+            adminCurrentPage = page;
+            renderAdminSongList();
+            const container = document.getElementById('adminSongListContainer');
+            if (container) {
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         function previewSongInHome(id) {
@@ -1341,6 +1726,21 @@
             const paginationContainer = document.getElementById('paginationControls');
 
             if (!grid) return;
+
+            // When page loads for the first time, show small loader until data from database arrives
+            if (isInitialLoading) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-center">
+                        <div class="w-10 h-10 border-2 border-snapYellow/30 border-t-snapYellow rounded-full animate-spin mb-4"></div>
+                        <p class="text-sm font-bold text-white tracking-wide">Caricamento catalogo...</p>
+                        <p class="text-xs text-zinc-500 mt-1">Connessione al database Cloud in corso</p>
+                    </div>
+                `;
+                if (countBadge) countBadge.innerText = 'Caricamento...';
+                if (emptyState) emptyState.classList.add('hidden');
+                if (paginationContainer) paginationContainer.classList.add('hidden');
+                return;
+            }
 
             let filtered = songs;
             if (currentSearchQuery) {
@@ -1647,6 +2047,7 @@
             executeDownload,
             exportSongsJson,
             goToPage,
+            goToAdminPage,
             handleAdminLogout,
             handleHomeLogoClick,
             handleSubscribeClick,
@@ -1663,7 +2064,14 @@
             handleSearch,
             updateThumbnailPreview,
             handleAdminLoginForm,
-            handleSaveSong
+            handleSaveSong,
+            handleCookieConsent,
+            openCookieBanner,
+            resetCookiePreferences,
+            openCookiePolicyModal,
+            closeCookiePolicyModal,
+            openPrivacyPolicyModal,
+            closePrivacyPolicyModal
         });
     </script>
 </body>
