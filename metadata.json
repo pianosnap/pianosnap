@@ -1,0 +1,6 @@
+{
+  "name": "PianoSnap",
+  "description": "Learn piano fast with YouTube tutorials, downloadable MIDI arrangements, and printable sheet music.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
