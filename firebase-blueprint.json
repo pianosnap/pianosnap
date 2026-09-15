@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "Song": {
+      "title": "Song",
+      "description": "Piano tutorial song in the catalog with YouTube, MIDI, and Sheet links",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the song"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the song"
+        },
+        "artist": {
+          "type": "string",
+          "description": "Artist or composer"
+        },
+        "youtubeUrl": {
+          "type": "string",
+          "description": "YouTube video tutorial URL"
+        },
+        "midiUrl": {
+          "type": "string",
+          "description": "Custom link for MIDI download (Google Drive, direct, or any URL)"
+        },
+        "sheetUrl": {
+          "type": "string",
+          "description": "Custom link for sheet music download (Google Drive, direct, or any URL)"
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Creation timestamp in milliseconds"
+        }
+      },
+      "required": ["id", "title", "artist", "youtubeUrl"]
+    }
+  },
+  "firestore": {
+    "/songs/{songId}": {
+      "schema": "Song",
+      "description": "Public catalog of piano tutorials accessible to all visitors"
+    }
+  }
+}

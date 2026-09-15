@@ -365,7 +365,7 @@
                     </div>
                 </div>
 
-                <!-- Persistence & Catalog Sync Bar -->
+                <!-- Persistence & Cloud Database Sync Bar -->
                 <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <span class="relative flex h-3 w-3">
@@ -373,8 +373,11 @@
                             <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                         </span>
                         <div>
-                            <span class="text-xs font-bold text-white block">Salvataggio Locale Persistente Attivo</span>
-                            <p class="text-[11px] text-zinc-400">Tutte le modifiche, aggiunte ed eliminazioni restano salvate anche se ricarichi la pagina.</p>
+                            <div class="flex items-center gap-2">
+                                <span id="databaseStatusText" class="text-xs font-bold text-white block">Database Cloud Firebase Attivo (100% Gratuito)</span>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">Live Sync</span>
+                            </div>
+                            <p class="text-[11px] text-zinc-400">Tutti i visitatori vedono in tempo reale le canzoni aggiunte o modificate dall'admin.</p>
                         </div>
                     </div>
 
@@ -456,20 +459,20 @@
 
                             <div>
                                 <label class="block text-xs font-semibold text-zinc-300 mb-1">
-                                    Link File MIDI (opzionale)
+                                    Link Download MIDI (opzionale)
                                 </label>
-                                <input type="text" id="inputMidiUrl" placeholder="es. /downloads/canzone.mid oppure link Google Drive / Dropbox" 
+                                <input type="text" id="inputMidiUrl" placeholder="Incolla link Google Drive o qualsiasi link a tua scelta" 
                                     class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
-                                <p class="text-[10px] text-zinc-400 mt-1">Puoi inserire un percorso locale (es. <code class="text-snapYellow">/downloads/titolo.mid</code>) o link esterno (Google Drive, Dropbox, ecc.).</p>
+                                <p class="text-[10px] text-zinc-400 mt-1">Puoi inserire qualsiasi link (es. Google Drive condiviso). <span class="text-snapYellow">Non deve finire in .mid</span>, decidi tu liberamente.</p>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-zinc-300 mb-1">
-                                    Link Spartito PDF / Immagine (opzionale)
+                                    Link Download Spartito (opzionale)
                                 </label>
-                                <input type="text" id="inputSheetUrl" placeholder="es. /downloads/canzone.pdf oppure link Google Drive / Dropbox" 
+                                <input type="text" id="inputSheetUrl" placeholder="Incolla link Google Drive o qualsiasi link a tua scelta" 
                                     class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
-                                <p class="text-[10px] text-zinc-400 mt-1">Puoi inserire un percorso locale (es. <code class="text-snapYellow">/downloads/titolo.pdf</code>) o link esterno (Google Drive, Dropbox, ecc.).</p>
+                                <p class="text-[10px] text-zinc-400 mt-1">Puoi inserire qualsiasi link (es. Google Drive condiviso). <span class="text-snapYellow">Non deve finire in .pdf</span>, decidi tu liberamente.</p>
                             </div>
 
                             <div class="flex items-center gap-3 pt-3">
@@ -612,7 +615,44 @@
     <!-- ========================================== -->
     <!-- APPLICATION LOGIC & ROUTING                -->
     <!-- ========================================== -->
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDocFromServer,
+            setDoc, 
+            deleteDoc, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Firebase Configuration (Google Cloud / Firebase Free Tier)
+        const firebaseConfig = {
+            projectId: "wired-balancer-m7dgj",
+            appId: "1:872111048182:web:4799699552b1517466f3d7",
+            apiKey: "AIzaSyBxwmm8MmsBRsdNYV1tTuBUgj-javQZ6oU",
+            authDomain: "wired-balancer-m7dgj.firebaseapp.com",
+            storageBucket: "wired-balancer-m7dgj.firebasestorage.app",
+            messagingSenderId: "872111048182"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp, "ai-studio-pianosnap-5f6210df-c01d-4e20-abd2-28f85b276205");
+
+        // Validate Connection to Firestore
+        async function testConnection() {
+            try {
+                await getDocFromServer(doc(db, 'test', 'connection'));
+                console.log("Firebase Firestore connected successfully.");
+            } catch (error) {
+                if (error instanceof Error && error.message.includes('the client is offline')) {
+                    console.warn("Firestore client offline, falling back to local storage cache.");
+                }
+            }
+        }
+        testConnection();
+
         const DEFAULT_SONGS = [
             {
                 id: 'interstellar-main-theme',
@@ -659,9 +699,13 @@
         let adminFilterQuery = '';
 
         // Startup
-        window.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initApp();
+            });
+        } else {
             initApp();
-        });
+        }
 
         window.addEventListener('popstate', () => {
             checkRoute();
@@ -670,6 +714,7 @@
         async function initApp() {
             await fetchSongs();
             checkRoute();
+            initFirestoreListener();
         }
 
         // ==========================================
@@ -750,12 +795,11 @@
         }
 
         // ==========================================
-        // DATA SYNC WITH BACKEND & LOCAL STORAGE
+        // DATA SYNC WITH CLOUD FIRESTORE & LOCAL STORAGE
         // ==========================================
         async function fetchSongs() {
+            // First load from localStorage for instantaneous first render
             const stored = localStorage.getItem('pianosnap_songs');
-            const hasLocalModifications = Boolean(localStorage.getItem('pianosnap_songs_modified_at'));
-
             if (stored) {
                 try {
                     const parsed = JSON.parse(stored);
@@ -768,30 +812,55 @@
             }
             if (!songs || songs.length === 0) {
                 songs = [...DEFAULT_SONGS];
-                saveLocalSongs(false);
-            }
-
-            // Only attempt server fetch if the user hasn't explicitly customized songs locally,
-            // or fetch without overwriting user's local edits!
-            try {
-                const res = await fetch('/api/songs');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && Array.isArray(data.songs) && data.songs.length > 0) {
-                        // If user hasn't made local changes, update from server
-                        if (!hasLocalModifications) {
-                            songs = data.songs;
-                            localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
-                        }
-                    }
-                }
-            } catch (err) {
-                // Normal fallback on static hosting environments like Vercel
             }
 
             renderCatalog();
             if (adminToken) {
                 renderAdminDashboardData();
+            }
+        }
+
+        function initFirestoreListener() {
+            try {
+                const songsCol = collection(db, 'songs');
+                onSnapshot(songsCol, async (snapshot) => {
+                    if (snapshot.empty) {
+                        console.log("Firestore collection empty, seeding initial default songs...");
+                        try {
+                            for (const s of DEFAULT_SONGS) {
+                                await setDoc(doc(db, 'songs', s.id), s);
+                            }
+                        } catch(err) {
+                            console.warn("Could not seed initial songs into Firestore:", err);
+                        }
+                        return;
+                    }
+
+                    const firestoreSongs = [];
+                    snapshot.forEach((docSnap) => {
+                        firestoreSongs.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+
+                    // Sort newest first
+                    firestoreSongs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                    songs = firestoreSongs;
+                    localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+
+                    renderCatalog();
+                    if (adminToken) {
+                        renderAdminDashboardData();
+                    }
+
+                    const dbStatus = document.getElementById('databaseStatusText');
+                    if (dbStatus) {
+                        dbStatus.innerText = `Database Cloud Firebase Attivo (${songs.length} canzoni live)`;
+                    }
+                }, (error) => {
+                    console.warn("Firestore onSnapshot error:", error);
+                });
+            } catch (err) {
+                console.error("Failed to initialize Firestore listener:", err);
             }
         }
 
@@ -1100,69 +1169,59 @@
 
             const submitBtn = document.getElementById('saveSongSubmitBtn');
             submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvataggio Cloud...</span>`;
 
-            const payload = { title, artist, youtubeUrl, midiUrl, sheetUrl };
+            const songId = editId || (title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4));
+            const existingSong = editId ? songs.find(s => s.id === editId) : null;
 
+            const songData = {
+                id: songId,
+                title,
+                artist,
+                youtubeUrl,
+                midiUrl: midiUrl || '',
+                sheetUrl: sheetUrl || '',
+                createdAt: existingSong ? (existingSong.createdAt || Date.now()) : Date.now()
+            };
+
+            // 1. Cloud Firestore Save
             try {
-                let res;
-                if (editId) {
-                    res = await fetch(`/api/songs/${editId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                } else {
-                    res = await fetch('/api/songs', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                }
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && Array.isArray(data.songs)) {
-                        songs = data.songs;
-                    } else {
-                        await fetchSongs();
-                    }
-                } else {
-                    throw new Error('Server request failed');
-                }
-            } catch (err) {
-                // Local state update fallback
+                await setDoc(doc(db, 'songs', songId), songData, { merge: true });
+                showToast(editId ? 'Canzone aggiornata nel Cloud per tutti i visitatori!' : 'Nuova canzone pubblicata nel Cloud per tutti i visitatori!', 'fa-cloud-arrow-up');
+            } catch (firestoreErr) {
+                console.warn('Firestore write failed, saving locally:', firestoreErr);
+                // Fallback local update
                 if (editId) {
                     const idx = songs.findIndex(s => s.id === editId);
                     if (idx !== -1) {
-                        songs[idx] = { ...songs[idx], title, artist, youtubeUrl, midiUrl, sheetUrl };
+                        songs[idx] = songData;
                     }
                 } else {
-                    const newId = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4);
-                    songs.unshift({
-                        id: newId,
-                        title,
-                        artist,
-                        youtubeUrl,
-                        midiUrl,
-                        sheetUrl,
-                        createdAt: Date.now()
-                    });
+                    songs.unshift(songData);
                 }
+                saveLocalSongs();
+                renderAdminDashboardData();
+                renderCatalog();
+                showToast(editId ? 'Canzone aggiornata con successo!' : 'Nuova canzone aggiunta in Home!', 'fa-circle-check');
             }
 
-            saveLocalSongs();
-            renderAdminDashboardData();
-            renderCatalog();
+            // 2. Notify local server API if running in background
+            try {
+                const apiEndpoint = editId ? `/api/songs/${editId}` : '/api/songs';
+                const apiMethod = editId ? 'PUT' : 'POST';
+                fetch(apiEndpoint, {
+                    method: apiMethod,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                    },
+                    body: JSON.stringify(songData)
+                }).catch(() => {});
+            } catch (e) {}
+
             resetSongForm();
             submitBtn.disabled = false;
-
-            showToast(editId ? 'Canzone aggiornata con successo!' : 'Nuova canzone aggiunta in Home!', 'fa-circle-check');
+            submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> <span id="saveBtnText">Salva Canzone</span>`;
         }
 
         // ==========================================
@@ -1188,27 +1247,28 @@
 
             closeDeleteModal();
 
+            // 1. Cloud Firestore Delete
             try {
-                const res = await fetch(`/api/songs/${id}`, {
+                await deleteDoc(doc(db, 'songs', id));
+                showToast('Canzone eliminata dal Cloud per tutti i visitatori.', 'fa-trash');
+            } catch (err) {
+                console.warn('Firestore delete failed, falling back locally:', err);
+                songs = songs.filter(s => s.id !== id);
+                saveLocalSongs();
+                renderAdminDashboardData();
+                renderCatalog();
+                showToast('Canzone eliminata.', 'fa-trash');
+            }
+
+            // 2. Notify local server API if active
+            try {
+                fetch(`/api/songs/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
                     }
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && Array.isArray(data.songs)) {
-                        songs = data.songs;
-                    } else {
-                        songs = songs.filter(s => s.id !== id);
-                    }
-                } else {
-                    songs = songs.filter(s => s.id !== id);
-                }
-            } catch (err) {
-                songs = songs.filter(s => s.id !== id);
-            }
+                }).catch(() => {});
+            } catch (err) {}
 
             // If deleted song is current selected song, clear it
             if (currentSong && currentSong.id === id) {
@@ -1219,11 +1279,6 @@
             if (document.getElementById('editSongId').value === id) {
                 resetSongForm();
             }
-
-            saveLocalSongs();
-            renderAdminDashboardData();
-            renderCatalog();
-            showToast('Canzone eliminata con successo.', 'fa-trash');
         }
 
         // ==========================================
@@ -1465,17 +1520,26 @@
         function formatDownloadUrl(url) {
             if (!url) return '';
             let cleaned = url.trim();
-            // Google Drive direct download transformation
-            if (cleaned.includes('drive.google.com/file/d/')) {
-                const match = cleaned.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-                if (match && match[1]) {
-                    return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+
+            // Google Drive file download transformation
+            // Handles /file/d/ID/view, open?id=ID, uc?id=ID, etc.
+            if (cleaned.includes('drive.google.com')) {
+                const matchFile = cleaned.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchFile && matchFile[1]) {
+                    return `https://drive.google.com/uc?export=download&id=${matchFile[1]}`;
+                }
+                const matchId = cleaned.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                if (matchId && matchId[1]) {
+                    return `https://drive.google.com/uc?export=download&id=${matchId[1]}`;
                 }
             }
+
             // Dropbox direct download transformation
             if (cleaned.includes('dropbox.com') && cleaned.includes('dl=0')) {
                 return cleaned.replace('dl=0', 'dl=1');
             }
+
+            // Any other custom link decided by the user
             return cleaned;
         }
 
@@ -1494,7 +1558,11 @@
                 const a = document.createElement('a');
                 a.href = fileUrl;
                 a.target = '_blank';
-                a.setAttribute('download', fileName);
+                // Privacy attribute: prevents Google Drive or destination server from seeing referrer
+                a.rel = 'noopener noreferrer';
+                if (!fileUrl.includes('drive.google.com/drive/folders')) {
+                    a.setAttribute('download', fileName);
+                }
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -1512,7 +1580,7 @@
                 URL.revokeObjectURL(blobUrl);
             }
 
-            showToast(`Downloading ${isMidi ? 'MIDI arrangement' : 'Sheet Music PDF'}...`, 'fa-circle-down');
+            showToast(`Download avviato per ${isMidi ? 'MIDI' : 'Spartito'}!`, 'fa-circle-down');
         }
 
         function showToast(msg, icon = 'fa-circle-check') {
@@ -1529,6 +1597,36 @@
                 toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
             }, 3500);
         }
+
+        // Export all handler functions to window so inline HTML attributes (onclick, oninput, etc.) work in ES Module
+        Object.assign(window, {
+            handleImportSongsJson,
+            handleSortChange,
+            closeDeleteModal,
+            closeDownloadModal,
+            confirmDeleteSong,
+            copyShareLink,
+            executeDownload,
+            exportSongsJson,
+            goToPage,
+            handleAdminLogout,
+            handleHomeLogoClick,
+            handleSubscribeClick,
+            navigateToHome,
+            openDeleteModal,
+            previewSongInHome,
+            resetSongForm,
+            resetToDefaultSongs,
+            selectSong,
+            showAllSongs,
+            startEditSong,
+            triggerDownloadModal,
+            handleAdminSearch,
+            handleSearch,
+            updateThumbnailPreview,
+            handleAdminLoginForm,
+            handleSaveSong
+        });
     </script>
 </body>
 </html>
