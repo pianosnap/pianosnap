@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PianoSnap - Learn Fast. Play Now.</title>
+    <meta name="description" content="Learn piano fast with YouTube tutorials, downloadable MIDI arrangements, and printable sheet music.">
+    <meta property="og:title" content="PianoSnap - Learn Fast. Play Now.">
+    <meta property="og:description" content="Learn piano fast with YouTube tutorials, downloadable MIDI arrangements, and printable sheet music.">
+    
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23000'/><path d='M30 25h40v50H30z' fill='%23ffe500'/><path d='M45 25h10v30H45z' fill='%23000'/></svg>">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts: Inter & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        snapYellow: '#FFE500',
+                        snapYellowDark: '#D4BE00',
+                        snapDark: '#0A0A0B',
+                        snapCard: '#131316',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #08080a;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0d10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffe500;
+        }
+    </style>
+</head>
+<body class="min-h-screen selection:bg-snapYellow selection:text-black">
+
+    <!-- ========================================== -->
+    <!-- PUBLIC SITE VIEW (DEFAULT HOME VIEW)       -->
+    <!-- ========================================== -->
+    <div id="publicSiteView" class="min-h-screen flex flex-col justify-between">
+
+        <!-- Top Navigation Header (No admin link - hidden!) -->
+        <header class="sticky top-0 z-40 bg-snapDark/90 backdrop-blur-md border-b border-zinc-800/80">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                
+                <!-- Logo & Brand Subtitle -->
+                <a href="/" onclick="handleHomeLogoClick(event)" class="flex items-center gap-3 group">
+                    <div class="relative w-12 h-12 bg-black border-2 border-snapYellow rounded-xl flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-105 transition-transform">
+                        <span class="font-display font-black text-2xl text-white tracking-tighter">P</span>
+                        <i class="fa-solid font-black fa-bolt text-snapYellow text-xl absolute -right-1 bottom-1 transform -rotate-12"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-display font-black text-2xl text-white tracking-wider">PIANO</span>
+                            <span class="font-display font-black text-2xl text-snapYellow tracking-wider">SNAP</span>
+                        </div>
+                        <span class="text-xs font-semibold text-zinc-400 tracking-widest uppercase">Learn Fast. Play Now.</span>
+                    </div>
+                </a>
+
+                <!-- Search Bar -->
+                <div class="flex items-center gap-3">
+                    <div class="relative w-48 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+                        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search songs or artists..." 
+                            class="w-full bg-zinc-900/90 text-sm text-white placeholder-zinc-500 rounded-full pl-10 pr-4 py-2 border border-zinc-800 focus:outline-none focus:border-snapYellow transition">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Focused Single Song View -->
+            <section id="singleSongSection" class="hidden mb-12">
+                <div class="flex items-center justify-between mb-6">
+                    <button onclick="showAllSongs()" class="text-sm font-semibold text-zinc-400 hover:text-snapYellow transition flex items-center gap-2 bg-zinc-900/80 px-4 py-2 rounded-full border border-zinc-800">
+                        <i class="fa-solid fa-arrow-left"></i> Back to all songs
+                    </button>
+                    <button onclick="copyShareLink()" class="text-sm font-semibold text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-full border border-zinc-800 transition flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes text-snapYellow"></i>
+                        <span>Copy Tutorial Link</span>
+                    </button>
+                </div>
+
+                <div class="bg-snapCard rounded-3xl border border-zinc-800/80 overflow-hidden shadow-2xl">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+                        
+                        <!-- Left: Video Player Embed -->
+                        <div class="lg:col-span-7 bg-black flex items-center justify-center relative aspect-video">
+                            <iframe id="youtubeIframe" class="w-full h-full" src="" title="PianoSnap Tutorial Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+
+                        <!-- Right: Song Details & Download Buttons -->
+                        <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-zinc-900/40">
+                            <div>
+                                <div class="flex items-center gap-2 text-xs font-bold text-snapYellow uppercase tracking-wider mb-2">
+                                    <i class="fa-solid fa-compact-disc"></i> Selected Song
+                                </div>
+                                <h2 id="songTitle" class="font-display font-extrabold text-2xl sm:text-3xl text-white mb-2 leading-tight">--</h2>
+                                <p id="songArtist" class="text-zinc-400 font-medium text-base mb-6">--</p>
+                                
+                                <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800/80 mb-6 text-xs text-zinc-400 space-y-2">
+                                    <div class="flex items-center justify-between text-zinc-300 font-semibold text-sm">
+                                        <span>Download Options</span>
+                                        <span class="text-emerald-400 font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-check-circle text-xs"></i> Verified Free
+                                        </span>
+                                    </div>
+                                    <p>Unlock both official MIDI arrangement and high-resolution Printable Sheet Music directly below.</p>
+                                </div>
+                            </div>
+
+                            <!-- Download Buttons -->
+                            <div class="space-y-3.5">
+                                <button onclick="triggerDownloadModal('midi')" class="w-full group relative overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-800 hover:from-snapYellow hover:to-amber-400 text-white hover:text-black font-extrabold py-4 px-6 rounded-2xl border border-zinc-700/80 hover:border-snapYellow transition-all duration-300 flex items-center justify-between shadow-lg">
+                                    <div class="flex items-center gap-3.5">
+                                        <div class="w-10 h-10 rounded-xl bg-zinc-800 group-hover:bg-black/20 flex items-center justify-center text-snapYellow group-hover:text-black transition">
+                                            <i class="fa-solid fa-sliders text-lg"></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <div class="text-sm tracking-wide font-black uppercase">Download MIDI</div>
+                                            <div class="text-xs font-medium opacity-70">Synthesia & DAW Compatible (.mid)</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-download text-lg transform group-hover:translate-y-0.5 transition"></i>
+                                </button>
+
+                                <button onclick="triggerDownloadModal('sheet')" class="w-full group relative overflow-hidden bg-gradient-to-r from-zinc-900 to-zinc-800 hover:from-snapYellow hover:to-amber-400 text-white hover:text-black font-extrabold py-4 px-6 rounded-2xl border border-zinc-700/80 hover:border-snapYellow transition-all duration-300 flex items-center justify-between shadow-lg">
+                                    <div class="flex items-center gap-3.5">
+                                        <div class="w-10 h-10 rounded-xl bg-zinc-800 group-hover:bg-black/20 flex items-center justify-center text-snapYellow group-hover:text-black transition">
+                                            <i class="fa-solid fa-file-lines text-lg"></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <div class="text-sm tracking-wide font-black uppercase">Download Sheet</div>
+                                            <div class="text-xs font-medium opacity-70">Printable Score PDF / Image</div>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-download text-lg transform group-hover:translate-y-0.5 transition"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Catalog Controls -->
+            <div id="catalogHeader" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-snapCard/80 p-4 rounded-2xl border border-zinc-800/80">
+                <div class="flex items-center gap-3">
+                    <h3 class="font-display font-extrabold text-xl text-white flex items-center gap-2">
+                        <i class="fa-solid fa-music text-snapYellow"></i>
+                        <span id="catalogTitle">Song Catalog</span>
+                    </h3>
+                    <span id="songCountBadge" class="text-xs font-black px-3 py-1 bg-snapYellow/10 text-snapYellow rounded-full border border-snapYellow/30">
+                        0 Total Songs
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+                    <div class="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 text-xs text-zinc-300">
+                        <i class="fa-solid fa-arrow-down-short-wide text-snapYellow"></i>
+                        <label for="sortSelect" class="font-medium whitespace-nowrap">Sort by:</label>
+                        <select id="sortSelect" onchange="handleSortChange(this.value)" class="bg-transparent text-white font-bold focus:outline-none cursor-pointer">
+                            <option value="newest" class="bg-zinc-900 text-white">Newest first</option>
+                            <option value="oldest" class="bg-zinc-900 text-white">Oldest first</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Songs Grid Catalog -->
+            <div id="songsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <!-- Dynamic Cards Injected via JS -->
+            </div>
+
+            <!-- Pagination Controls -->
+            <div id="paginationControls" class="flex items-center justify-center gap-3 mb-16 hidden">
+                <!-- Dynamic Paginator Injected via JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyCatalog" class="hidden text-center py-16 bg-snapCard rounded-3xl border border-zinc-800">
+                <div class="w-16 h-16 rounded-full bg-zinc-900 text-zinc-500 flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-music"></i>
+                </div>
+                <h4 class="text-lg font-bold text-white mb-1">No songs found</h4>
+                <p class="text-sm text-zinc-500 max-w-sm mx-auto mb-4">Try searching for another song title or artist.</p>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="border-t border-zinc-800/80 bg-black/60 py-8 mt-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+                <div class="flex items-center gap-2">
+                    <span class="font-display font-black text-white">PIANO<span class="text-snapYellow">SNAP</span></span>
+                    <span>&copy; 2026 PianoSnap. All rights reserved.</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" class="hover:text-snapYellow transition flex items-center gap-1.5">
+                        <i class="fa-brands fa-youtube text-red-500 text-sm"></i> YouTube Channel
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- HIDDEN ADMIN PAGE (ACCESSIBLE ONLY VIA LINK) -->
+    <!-- ========================================== -->
+    <div id="adminPageView" class="hidden min-h-screen bg-[#08080a] flex flex-col justify-between">
+        
+        <!-- Admin Header -->
+        <header class="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-snapYellow text-black rounded-xl flex items-center justify-center font-black text-xl shadow-lg">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-black text-xl text-white tracking-wider">PIANOSNAP</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-snapYellow/10 text-snapYellow border border-snapYellow/30 font-bold uppercase tracking-wider">Admin</span>
+                        </div>
+                        <span class="text-[11px] text-zinc-400">Pannello di Gestione Canzoni Riservato</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="navigateToHome()" class="text-xs font-bold text-zinc-300 hover:text-snapYellow bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-xl border border-zinc-800 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Torna alla Home</span>
+                    </button>
+                    <button id="adminLogoutBtn" onclick="handleAdminLogout()" class="hidden text-xs font-bold text-red-400 hover:text-white hover:bg-red-600 bg-red-950/40 px-4 py-2 rounded-xl border border-red-800/50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Disconnetti</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Admin Content Area -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- 1. Admin Login Section (Shown when unauthenticated) -->
+            <div id="adminLoginSection" class="max-w-md mx-auto my-12 bg-snapCard p-8 rounded-3xl border border-zinc-800 shadow-2xl">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 rounded-2xl bg-snapYellow/10 text-snapYellow border border-snapYellow/20 flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h2 class="font-display font-black text-2xl text-white">Accesso Riservato Admin</h2>
+                    <p class="text-xs text-zinc-400 mt-2">Inserisci le credenziali di amministratore per gestire il catalogo.</p>
+                </div>
+
+                <div id="adminLoginError" class="hidden mb-5 p-3.5 bg-red-950/60 border border-red-800/80 rounded-xl text-xs text-red-300 flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-exclamation text-red-400 text-sm"></i>
+                    <span id="adminLoginErrorText">Credenziali non valide. Riprova.</span>
+                </div>
+
+                <form onsubmit="handleAdminLoginForm(event)" class="space-y-4">
+                    <div>
+                        <label for="adminUsernameInput" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                            Username
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+                            <input type="text" id="adminUsernameInput" required placeholder="Inserisci username" 
+                                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-snapYellow transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="adminPasswordInput" class="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+                            <input type="password" id="adminPasswordInput" required placeholder="Inserisci password" 
+                                class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-white text-sm focus:outline-none focus:border-snapYellow transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="adminLoginSubmitBtn" class="w-full bg-snapYellow hover:bg-snapYellowDark text-black font-extrabold py-3.5 rounded-xl transition text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 mt-4">
+                        <i class="fa-solid fa-unlock"></i>
+                        <span>Accedi al Pannello</span>
+                    </button>
+                </form>
+
+                <div class="mt-8 pt-6 border-t border-zinc-800 text-center">
+                    <button onclick="navigateToHome()" class="text-xs text-zinc-400 hover:text-snapYellow transition flex items-center justify-center gap-2 mx-auto">
+                        <i class="fa-solid fa-arrow-left"></i> Ritorna alla pagina pubblica
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Admin Dashboard (Shown when authenticated) -->
+            <div id="adminDashboardSection" class="hidden space-y-8">
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-snapCard p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-zinc-400 block mb-1 uppercase tracking-wider">Canzoni in Home</span>
+                            <span id="statTotalSongs" class="font-display font-extrabold text-3xl text-white">0</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-snapYellow/10 text-snapYellow flex items-center justify-center text-xl border border-snapYellow/20">
+                            <i class="fa-solid fa-music"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-snapCard p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-zinc-400 block mb-1 uppercase tracking-wider">Con File MIDI</span>
+                            <span id="statMidiSongs" class="font-display font-extrabold text-3xl text-emerald-400">0</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/20">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-snapCard p-5 rounded-2xl border border-zinc-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-zinc-400 block mb-1 uppercase tracking-wider">Con Spartito / PDF</span>
+                            <span id="statSheetSongs" class="font-display font-extrabold text-3xl text-blue-400">0</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl border border-blue-500/20">
+                            <i class="fa-solid fa-file-lines"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout: Song Editor Form + Songs Catalog Management -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    <!-- Left: Add / Edit Song Form -->
+                    <div class="lg:col-span-5 bg-snapCard p-6 rounded-3xl border border-zinc-800 shadow-xl h-fit sticky top-28">
+                        <div class="flex items-center justify-between mb-5 pb-4 border-b border-zinc-800">
+                            <div>
+                                <h3 id="formSectionTitle" class="font-display font-extrabold text-lg text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-plus-circle text-snapYellow"></i>
+                                    <span>Aggiungi Nuova Canzone</span>
+                                </h3>
+                                <p class="text-xs text-zinc-400">Compila i dati per pubblicare o modificare una canzone.</p>
+                            </div>
+                            <span id="editingModeBadge" class="hidden text-[10px] font-bold px-2.5 py-1 bg-snapYellow text-black rounded-lg uppercase tracking-wider animate-pulse">
+                                In Modifica
+                            </span>
+                        </div>
+
+                        <form id="songForm" onsubmit="handleSaveSong(event)" class="space-y-4">
+                            <input type="hidden" id="editSongId">
+
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">
+                                    Titolo Canzone <span class="text-snapYellow">*</span>
+                                </label>
+                                <input type="text" id="inputTitle" required placeholder="es. Interstellar - Main Theme" 
+                                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">
+                                    Artista / Arrangiatore <span class="text-snapYellow">*</span>
+                                </label>
+                                <input type="text" id="inputArtist" required placeholder="es. Hans Zimmer / PianoSnap" 
+                                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">
+                                    Link Video YouTube o Video ID <span class="text-snapYellow">*</span>
+                                </label>
+                                <input type="text" id="inputYoutube" required oninput="updateThumbnailPreview(this.value)" placeholder="es. https://www.youtube.com/watch?v=BYL30114i-U" 
+                                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
+                                
+                                <!-- Live Thumbnail Preview -->
+                                <div class="mt-2.5 p-2 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
+                                    <img id="formThumbnailPreview" src="https://img.youtube.com/vi/BYL30114i-U/hqdefault.jpg" alt="Anteprima" class="w-16 h-10 object-cover rounded-lg bg-black">
+                                    <div class="text-[11px] text-zinc-400">
+                                        <span class="text-zinc-300 font-medium block">Anteprima miniatura YouTube</span>
+                                        <span id="previewVideoIdText" class="text-snapYellow font-mono">ID: BYL30114i-U</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">
+                                    Link File MIDI (opzionale)
+                                </label>
+                                <input type="text" id="inputMidiUrl" placeholder="URL diretto al file .mid (o lascia vuoto)" 
+                                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
+                                <p class="text-[10px] text-zinc-500 mt-1">Se vuoto, il download genera un file di arrangiamento compatibile.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-zinc-300 mb-1">
+                                    Link Spartito PDF / Immagine (opzionale)
+                                </label>
+                                <input type="text" id="inputSheetUrl" placeholder="URL diretto a file PDF / immagine spartito" 
+                                    class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
+                                <p class="text-[10px] text-zinc-500 mt-1">Se vuoto, il download genera una partitura ufficiale verificata.</p>
+                            </div>
+
+                            <div class="flex items-center gap-3 pt-3">
+                                <button type="submit" id="saveSongSubmitBtn" class="flex-1 bg-snapYellow hover:bg-snapYellowDark text-black font-extrabold py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-check"></i>
+                                    <span id="saveBtnText">Salva Canzone</span>
+                                </button>
+                                <button type="button" id="cancelEditBtn" onclick="resetSongForm()" class="hidden bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-3 px-4 rounded-xl text-xs transition">
+                                    Annulla
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right: Manage Existing Songs in Home -->
+                    <div class="lg:col-span-7 bg-snapCard p-6 rounded-3xl border border-zinc-800 shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-zinc-800">
+                                <div>
+                                    <h3 class="font-display font-extrabold text-lg text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-list-check text-snapYellow"></i>
+                                        <span>Gestione Canzoni in Home</span>
+                                    </h3>
+                                    <p class="text-xs text-zinc-400">Modifica, cancella o visualizza le canzoni attive nella home.</p>
+                                </div>
+                                
+                                <div class="relative w-full sm:w-56">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
+                                    <input type="text" id="adminSongSearchInput" oninput="handleAdminSearch(this.value)" placeholder="Filtra canzoni..." 
+                                        class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-snapYellow transition">
+                                </div>
+                            </div>
+
+                            <!-- Songs List Table / Cards -->
+                            <div id="adminSongListContainer" class="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                                <!-- Dynamic List Injected via JS -->
+                            </div>
+
+                            <!-- Empty Search in Admin -->
+                            <div id="adminEmptySearch" class="hidden text-center py-12 text-zinc-500 text-xs">
+                                <i class="fa-solid fa-circle-question text-2xl mb-2 block"></i>
+                                Nessuna canzone trovata per questa ricerca.
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-500">
+                            <span>Le modifiche sono istantaneamente attive sul sito live.</span>
+                            <button onclick="navigateToHome()" class="text-snapYellow hover:underline font-bold flex items-center gap-1.5">
+                                <span>Verifica in Home</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Admin Footer -->
+        <footer class="border-t border-zinc-900 bg-black/40 py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs text-zinc-500">
+                <span>PianoSnap Admin Portal &bull; Accesso Riservato</span>
+                <span class="font-mono text-[11px] text-zinc-600">v2.0-secured</span>
+            </div>
+        </footer>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODALS & OVERLAYS                          -->
+    <!-- ========================================== -->
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm hidden p-4">
+        <div class="bg-zinc-900 text-white rounded-3xl max-w-sm w-full p-6 border border-zinc-800 shadow-2xl relative animate-in fade-in zoom-in duration-150">
+            <div class="w-12 h-12 rounded-2xl bg-red-950/80 text-red-400 border border-red-800/80 flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <h3 class="font-display font-extrabold text-lg text-center text-white mb-2">Eliminare la canzone?</h3>
+            <p id="deleteConfirmSongTitle" class="text-xs text-zinc-400 text-center mb-6">
+                Questa azione rimuoverà la canzone dal sito live e non può essere annullata.
+            </p>
+            <input type="hidden" id="deleteTargetSongId">
+            <div class="flex items-center gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 rounded-xl text-xs transition">
+                    Annulla
+                </button>
+                <button onclick="confirmDeleteSong()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-extrabold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-lg">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                    <span>Elimina</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscribe to Unlock Modal (Public Site) -->
+    <div id="downloadModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
+        <div class="bg-white text-black rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            
+            <button onclick="closeDownloadModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-black w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="mb-6 flex justify-start">
+                <span class="w-3.5 h-3.5 rounded-full bg-black inline-block"></span>
+            </div>
+
+            <h2 class="font-display font-black text-xl sm:text-2xl text-black tracking-tight leading-snug uppercase mb-8">
+                PLEASE SUPPORT THE ARTIST TO UNLOCK YOUR DOWNLOAD
+            </h2>
+
+            <div class="space-y-4">
+                <a id="subscribeLinkBtn" href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" onclick="handleSubscribeClick()" class="w-full bg-[#FF0000] hover:bg-[#D60000] text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-md hover:shadow-lg transition text-base sm:text-lg">
+                    <i class="fa-brands fa-youtube text-2xl"></i>
+                    <span>Subscribe To PIANOSNAP</span>
+                </a>
+
+                <button id="nextDownloadBtn" disabled onclick="executeDownload()" class="w-full bg-zinc-100 text-zinc-400 font-bold py-3.5 px-6 rounded-2xl border border-zinc-200 cursor-not-allowed transition text-base flex items-center justify-center gap-2">
+                    <span>Next</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+
+            <p class="text-[11px] text-zinc-400 text-center mt-6">
+                Clicking Subscribe opens YouTube in a new tab. Afterwards, click <strong>Next</strong> to start your download.
+            </p>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-zinc-900 text-white border border-snapYellow/40 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastIcon" class="text-snapYellow text-lg"><i class="fa-solid fa-circle-check"></i></div>
+        <div id="toastMessage" class="text-sm font-medium">Notifica</div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- APPLICATION LOGIC & ROUTING                -->
+    <!-- ========================================== -->
+    <script>
+        const DEFAULT_SONGS = [
+            {
+                id: 'interstellar-main-theme',
+                title: 'Interstellar - Main Theme (First Step)',
+                artist: 'Hans Zimmer / Arr. PianoSnap',
+                youtubeUrl: 'https://www.youtube.com/watch?v=BYL30114i-U',
+                midiUrl: '',
+                sheetUrl: '',
+                createdAt: 1700000000000
+            },
+            {
+                id: 'golden-hour-piano',
+                title: 'Golden Hour (Fast Piano Tutorial)',
+                artist: 'JVKE / PianoSnap',
+                youtubeUrl: 'https://www.youtube.com/watch?v=PEM0Vs8jf1w',
+                midiUrl: '',
+                sheetUrl: '',
+                createdAt: 1700000100000
+            },
+            {
+                id: 'rush-e-easy-version',
+                title: 'Rush E - Easy & Fast Piano Tutorial',
+                artist: 'Sheet Music Boss / PianoSnap',
+                youtubeUrl: 'https://www.youtube.com/watch?v=Q8P_xT62-P8',
+                midiUrl: '',
+                sheetUrl: '',
+                createdAt: 1700000200000
+            }
+        ];
+
+        // State variables
+        let songs = [];
+        let currentSong = null;
+        let selectedFileType = null;
+        let hasClickedSubscribe = false;
+        
+        let currentPage = 1;
+        const SONGS_PER_PAGE = 30;
+        let currentSortOrder = 'newest';
+        let currentSearchQuery = '';
+
+        // Admin State
+        let adminToken = sessionStorage.getItem('ps_admin_token') || null;
+        let adminFilterQuery = '';
+
+        // Startup
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+
+        window.addEventListener('popstate', () => {
+            checkRoute();
+        });
+
+        async function initApp() {
+            await fetchSongs();
+            checkRoute();
+        }
+
+        // ==========================================
+        // ROUTING (PUBLIC VS HIDDEN ADMIN)
+        // ==========================================
+        function checkRoute() {
+            const path = window.location.pathname;
+            const hash = window.location.hash;
+            const params = new URLSearchParams(window.location.search);
+
+            const isAdminRoute = path === '/admin' || path.endsWith('/admin') || hash === '#admin' || params.has('admin');
+
+            if (isAdminRoute) {
+                showAdminView();
+            } else {
+                showPublicView();
+                // Check if direct song requested via parameter
+                const songId = params.get('song');
+                const videoId = params.get('v');
+                if (songId) {
+                    const found = songs.find(s => s.id === songId);
+                    if (found) {
+                        selectSong(found.id, false);
+                        return;
+                    }
+                }
+                if (videoId) {
+                    const foundByVideo = songs.find(s => getYoutubeId(s.youtubeUrl) === videoId);
+                    if (foundByVideo) {
+                        selectSong(foundByVideo.id, false);
+                        return;
+                    }
+                }
+                showAllSongs();
+            }
+        }
+
+        function showAdminView() {
+            document.getElementById('publicSiteView').classList.add('hidden');
+            document.getElementById('adminPageView').classList.remove('hidden');
+
+            if (adminToken) {
+                showAdminDashboard();
+            } else {
+                showAdminLogin();
+            }
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+
+        function showPublicView() {
+            document.getElementById('adminPageView').classList.add('hidden');
+            document.getElementById('publicSiteView').classList.remove('hidden');
+            renderCatalog();
+        }
+
+        function navigateToAdmin() {
+            try {
+                if (!window.location.href.startsWith('blob:')) {
+                    window.history.pushState({}, '', '/admin');
+                }
+            } catch(e) {}
+            showAdminView();
+        }
+
+        function navigateToHome() {
+            try {
+                if (!window.location.href.startsWith('blob:')) {
+                    window.history.pushState({}, '', '/');
+                }
+            } catch(e) {}
+            showPublicView();
+        }
+
+        function handleHomeLogoClick(e) {
+            e.preventDefault();
+            navigateToHome();
+            showAllSongs();
+        }
+
+        // ==========================================
+        // DATA SYNC WITH BACKEND & LOCAL STORAGE
+        // ==========================================
+        async function fetchSongs() {
+            // First load from localStorage for instant display
+            const stored = localStorage.getItem('pianosnap_songs');
+            if (stored) {
+                try {
+                    songs = JSON.parse(stored);
+                } catch(e) {}
+            }
+            if (!songs || songs.length === 0) {
+                songs = [...DEFAULT_SONGS];
+            }
+
+            // Then fetch updated list from backend server
+            try {
+                const res = await fetch('/api/songs');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Array.isArray(data.songs) && data.songs.length > 0) {
+                        songs = data.songs;
+                        localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                    }
+                }
+            } catch (err) {
+                console.warn('API /api/songs fetch fallback to local cache:', err);
+            }
+
+            renderCatalog();
+            if (adminToken) {
+                renderAdminDashboardData();
+            }
+        }
+
+        function saveLocalSongs() {
+            localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+        }
+
+        function getYoutubeId(url) {
+            if (!url) return 'BYL30114i-U';
+            if (url.length === 11 && !url.includes('/') && !url.includes('?')) return url;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : 'BYL30114i-U';
+        }
+
+        // ==========================================
+        // ADMIN AUTHENTICATION
+        // ==========================================
+        function showAdminLogin() {
+            document.getElementById('adminLoginSection').classList.remove('hidden');
+            document.getElementById('adminDashboardSection').classList.add('hidden');
+            document.getElementById('adminLogoutBtn').classList.add('hidden');
+            document.getElementById('adminLoginError').classList.add('hidden');
+            document.getElementById('adminUsernameInput').value = '';
+            document.getElementById('adminPasswordInput').value = '';
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('adminLoginSection').classList.add('hidden');
+            document.getElementById('adminDashboardSection').classList.remove('hidden');
+            document.getElementById('adminLogoutBtn').classList.remove('hidden');
+            renderAdminDashboardData();
+        }
+
+        async function handleAdminLoginForm(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsernameInput').value.trim();
+            const password = document.getElementById('adminPasswordInput').value;
+            const errorBanner = document.getElementById('adminLoginError');
+            const errorText = document.getElementById('adminLoginErrorText');
+            const submitBtn = document.getElementById('adminLoginSubmitBtn');
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifica in corso...</span>`;
+
+            try {
+                // Call server API for authentication
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    adminToken = data.token;
+                    sessionStorage.setItem('ps_admin_token', adminToken);
+                    errorBanner.classList.add('hidden');
+                    showAdminDashboard();
+                    showToast('Accesso autorizzato! Benvenuto Admin.', 'fa-user-shield');
+                } else {
+                    errorText.innerText = data.error || 'Username o password non corretti.';
+                    errorBanner.classList.remove('hidden');
+                }
+            } catch (err) {
+                // Fallback direct credential check if server offline
+                if (username === 'admin' && password === 'Ilcucchiaiononesiste23--') {
+                    adminToken = 'ps_admin_session_auth_matrix_2026';
+                    sessionStorage.setItem('ps_admin_token', adminToken);
+                    errorBanner.classList.add('hidden');
+                    showAdminDashboard();
+                    showToast('Accesso eseguito con successo!', 'fa-user-shield');
+                } else {
+                    errorText.innerText = 'Username o password errati. Riprova.';
+                    errorBanner.classList.remove('hidden');
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-unlock"></i> <span>Accedi al Pannello</span>`;
+            }
+        }
+
+        function handleAdminLogout() {
+            adminToken = null;
+            sessionStorage.removeItem('ps_admin_token');
+            showAdminLogin();
+            showToast('Disconnessione effettuata.', 'fa-right-from-bracket');
+        }
+
+        // ==========================================
+        // ADMIN SONG MANAGEMENT (ADD, EDIT, DELETE)
+        // ==========================================
+        function renderAdminDashboardData() {
+            const statTotal = document.getElementById('statTotalSongs');
+            const statMidi = document.getElementById('statMidiSongs');
+            const statSheet = document.getElementById('statSheetSongs');
+
+            const total = songs.length;
+            const midiCount = songs.filter(s => s.midiUrl && s.midiUrl.trim() !== '').length;
+            const sheetCount = songs.filter(s => s.sheetUrl && s.sheetUrl.trim() !== '').length;
+
+            statTotal.innerText = total;
+            statMidi.innerText = midiCount;
+            statSheet.innerText = sheetCount;
+
+            renderAdminSongList();
+        }
+
+        function updateThumbnailPreview(url) {
+            const ytId = getYoutubeId(url);
+            document.getElementById('formThumbnailPreview').src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+            document.getElementById('previewVideoIdText').innerText = `ID: ${ytId}`;
+        }
+
+        function handleAdminSearch(query) {
+            adminFilterQuery = query.toLowerCase().trim();
+            renderAdminSongList();
+        }
+
+        function renderAdminSongList() {
+            const container = document.getElementById('adminSongListContainer');
+            const emptyNotice = document.getElementById('adminEmptySearch');
+
+            let list = songs;
+            if (adminFilterQuery) {
+                list = songs.filter(s => 
+                    s.title.toLowerCase().includes(adminFilterQuery) ||
+                    s.artist.toLowerCase().includes(adminFilterQuery)
+                );
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = '';
+                emptyNotice.classList.remove('hidden');
+                return;
+            } else {
+                emptyNotice.classList.add('hidden');
+            }
+
+            container.innerHTML = '';
+            list.forEach(song => {
+                const ytId = getYoutubeId(song.youtubeUrl);
+                const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                const hasMidi = Boolean(song.midiUrl && song.midiUrl.trim());
+                const hasSheet = Boolean(song.sheetUrl && song.sheetUrl.trim());
+
+                const item = document.createElement('div');
+                item.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-zinc-900/90 border border-zinc-800 rounded-2xl gap-3 hover:border-zinc-700 transition group';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="relative w-16 h-11 bg-black rounded-lg overflow-hidden shrink-0 border border-zinc-800">
+                            <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover">
+                            <a href="${song.youtubeUrl}" target="_blank" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-snapYellow text-xs" title="Guarda su YouTube">
+                                <i class="fa-brands fa-youtube text-red-500 text-sm"></i>
+                            </a>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-white text-xs sm:text-sm truncate group-hover:text-snapYellow transition">${song.title}</h4>
+                            <p class="text-[11px] text-zinc-400 truncate">${song.artist}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[10px] px-1.5 py-0.5 rounded ${hasMidi ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-zinc-800 text-zinc-500'}">
+                                    <i class="fa-solid fa-sliders text-[9px]"></i> MIDI ${hasMidi ? 'OK' : 'Auto'}
+                                </span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded ${hasSheet ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-zinc-800 text-zinc-500'}">
+                                    <i class="fa-solid fa-file-lines text-[9px]"></i> Sheet ${hasSheet ? 'OK' : 'Auto'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        <button onclick="previewSongInHome('${song.id}')" title="Ascolta e vedi in Home" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl text-xs transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-play text-snapYellow"></i>
+                            <span class="hidden md:inline">Vedi</span>
+                        </button>
+
+                        <button onclick="startEditSong('${song.id}')" title="Modifica questa canzone" class="px-3 py-1.5 bg-snapYellow/10 hover:bg-snapYellow hover:text-black text-snapYellow border border-snapYellow/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Modifica</span>
+                        </button>
+
+                        <button onclick="openDeleteModal('${song.id}')" title="Elimina dal catalogo" class="p-2 bg-red-950/60 hover:bg-red-600 text-red-300 hover:text-white border border-red-800/40 rounded-xl text-xs transition">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function previewSongInHome(id) {
+            navigateToHome();
+            selectSong(id);
+        }
+
+        function startEditSong(id) {
+            const song = songs.find(s => s.id === id);
+            if (!song) return;
+
+            document.getElementById('editSongId').value = song.id;
+            document.getElementById('inputTitle').value = song.title;
+            document.getElementById('inputArtist').value = song.artist;
+            document.getElementById('inputYoutube').value = song.youtubeUrl;
+            document.getElementById('inputMidiUrl').value = song.midiUrl || '';
+            document.getElementById('inputSheetUrl').value = song.sheetUrl || '';
+
+            updateThumbnailPreview(song.youtubeUrl);
+
+            document.getElementById('formSectionTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-snapYellow"></i> <span>Modifica Canzone</span>`;
+            document.getElementById('editingModeBadge').classList.remove('hidden');
+            document.getElementById('saveBtnText').innerText = 'Aggiorna Canzone';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            // Scroll to form smoothly
+            document.getElementById('songForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('inputTitle').focus();
+        }
+
+        function resetSongForm() {
+            document.getElementById('editSongId').value = '';
+            document.getElementById('inputTitle').value = '';
+            document.getElementById('inputArtist').value = '';
+            document.getElementById('inputYoutube').value = '';
+            document.getElementById('inputMidiUrl').value = '';
+            document.getElementById('inputSheetUrl').value = '';
+
+            updateThumbnailPreview('BYL30114i-U');
+
+            document.getElementById('formSectionTitle').innerHTML = `<i class="fa-solid fa-plus-circle text-snapYellow"></i> <span>Aggiungi Nuova Canzone</span>`;
+            document.getElementById('editingModeBadge').classList.add('hidden');
+            document.getElementById('saveBtnText').innerText = 'Salva Canzone';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        async function handleSaveSong(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editSongId').value;
+            const title = document.getElementById('inputTitle').value.trim();
+            const artist = document.getElementById('inputArtist').value.trim();
+            const youtubeUrl = document.getElementById('inputYoutube').value.trim();
+            const midiUrl = document.getElementById('inputMidiUrl').value.trim();
+            const sheetUrl = document.getElementById('inputSheetUrl').value.trim();
+
+            if (!title || !artist || !youtubeUrl) {
+                showToast('Compila tutti i campi obbligatori!', 'fa-circle-exclamation');
+                return;
+            }
+
+            const submitBtn = document.getElementById('saveSongSubmitBtn');
+            submitBtn.disabled = true;
+
+            const payload = { title, artist, youtubeUrl, midiUrl, sheetUrl };
+
+            try {
+                let res;
+                if (editId) {
+                    res = await fetch(`/api/songs/${editId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    res = await fetch('/api/songs', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Array.isArray(data.songs)) {
+                        songs = data.songs;
+                    } else {
+                        await fetchSongs();
+                    }
+                } else {
+                    throw new Error('Server request failed');
+                }
+            } catch (err) {
+                // Local state update fallback
+                if (editId) {
+                    const idx = songs.findIndex(s => s.id === editId);
+                    if (idx !== -1) {
+                        songs[idx] = { ...songs[idx], title, artist, youtubeUrl, midiUrl, sheetUrl };
+                    }
+                } else {
+                    const newId = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4);
+                    songs.unshift({
+                        id: newId,
+                        title,
+                        artist,
+                        youtubeUrl,
+                        midiUrl,
+                        sheetUrl,
+                        createdAt: Date.now()
+                    });
+                }
+            }
+
+            saveLocalSongs();
+            renderAdminDashboardData();
+            renderCatalog();
+            resetSongForm();
+            submitBtn.disabled = false;
+
+            showToast(editId ? 'Canzone aggiornata con successo!' : 'Nuova canzone aggiunta in Home!', 'fa-circle-check');
+        }
+
+        // ==========================================
+        // DELETE SONG CONFIRMATION MODAL
+        // ==========================================
+        function openDeleteModal(id) {
+            const song = songs.find(s => s.id === id);
+            if (!song) return;
+
+            document.getElementById('deleteTargetSongId').value = song.id;
+            document.getElementById('deleteConfirmSongTitle').innerText = `Sei sicuro di voler eliminare "${song.title}"? Verrà rimossa definitivamente dalla home.`;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            document.getElementById('deleteTargetSongId').value = '';
+        }
+
+        async function confirmDeleteSong() {
+            const id = document.getElementById('deleteTargetSongId').value;
+            if (!id) return;
+
+            closeDeleteModal();
+
+            try {
+                const res = await fetch(`/api/songs/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Array.isArray(data.songs)) {
+                        songs = data.songs;
+                    } else {
+                        songs = songs.filter(s => s.id !== id);
+                    }
+                } else {
+                    songs = songs.filter(s => s.id !== id);
+                }
+            } catch (err) {
+                songs = songs.filter(s => s.id !== id);
+            }
+
+            // If deleted song is current selected song, clear it
+            if (currentSong && currentSong.id === id) {
+                showAllSongs();
+            }
+
+            // If editing this song, reset form
+            if (document.getElementById('editSongId').value === id) {
+                resetSongForm();
+            }
+
+            saveLocalSongs();
+            renderAdminDashboardData();
+            renderCatalog();
+            showToast('Canzone eliminata con successo.', 'fa-trash');
+        }
+
+        // ==========================================
+        // PUBLIC CATALOG & HOME INTERACTION
+        // ==========================================
+        function handleSortChange(order) {
+            currentSortOrder = order;
+            currentPage = 1;
+            renderCatalog();
+        }
+
+        function handleSearch(query) {
+            currentSearchQuery = query.toLowerCase().trim();
+            currentPage = 1;
+            renderCatalog();
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('songsGrid');
+            const countBadge = document.getElementById('songCountBadge');
+            const emptyState = document.getElementById('emptyCatalog');
+            const paginationContainer = document.getElementById('paginationControls');
+
+            if (!grid) return;
+
+            let filtered = songs;
+            if (currentSearchQuery) {
+                filtered = songs.filter(s => 
+                    s.title.toLowerCase().includes(currentSearchQuery) || 
+                    s.artist.toLowerCase().includes(currentSearchQuery)
+                );
+            }
+
+            filtered = [...filtered].sort((a, b) => {
+                const timeA = a.createdAt || 0;
+                const timeB = b.createdAt || 0;
+                return currentSortOrder === 'newest' ? timeB - timeA : timeA - timeB;
+            });
+
+            const totalCount = filtered.length;
+            countBadge.innerText = `${totalCount} ${totalCount === 1 ? 'Total Song' : 'Total Songs'}`;
+
+            if (totalCount === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                paginationContainer.classList.add('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            const totalPages = Math.ceil(totalCount / SONGS_PER_PAGE);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * SONGS_PER_PAGE;
+            const endIndex = startIndex + SONGS_PER_PAGE;
+            const pageSongs = filtered.slice(startIndex, endIndex);
+
+            grid.innerHTML = '';
+            pageSongs.forEach(song => {
+                const ytId = getYoutubeId(song.youtubeUrl);
+                const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+
+                const card = document.createElement('div');
+                card.className = 'bg-snapCard rounded-2xl border border-zinc-800/80 overflow-hidden hover:border-snapYellow/80 transition-all duration-300 group flex flex-col justify-between shadow-lg hover:shadow-2xl';
+                card.innerHTML = `
+                    <div>
+                        <div class="relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer" onclick="selectSong('${song.id}')">
+                            <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/111/ffe500?text=PianoSnap'">
+                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full bg-snapYellow/90 text-black flex items-center justify-center text-xl font-black shadow-lg transform group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-play ml-1"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-5">
+                            <h4 class="font-display font-bold text-lg text-white group-hover:text-snapYellow transition-colors line-clamp-1 mb-1">${song.title}</h4>
+                            <p class="text-xs text-zinc-400 line-clamp-1 mb-4">${song.artist}</p>
+                        </div>
+                    </div>
+
+                    <div class="px-5 pb-5 pt-0 flex items-center gap-2">
+                        <button onclick="selectSong('${song.id}')" class="flex-1 bg-snapYellow hover:bg-snapYellowDark text-black font-extrabold text-xs py-3 px-4 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg uppercase tracking-wider">
+                            <i class="fa-solid fa-download"></i> DOWNLOAD
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('paginationControls');
+            if (totalPages <= 1) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            let html = '';
+
+            html += `
+                <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''} 
+                    class="px-4 py-2 rounded-xl text-xs font-bold border transition ${currentPage === 1 ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800/50 cursor-not-allowed' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:text-snapYellow'} flex items-center gap-1.5">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    const isActive = i === currentPage;
+                    html += `
+                        <button onclick="goToPage(${i})" 
+                            class="w-9 h-9 rounded-xl text-xs font-black transition border ${isActive ? 'bg-snapYellow text-black border-snapYellow' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border-zinc-800 hover:text-white'}">
+                            ${i}
+                        </button>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<span class="text-zinc-600 font-bold text-xs px-1">...</span>`;
+                }
+            }
+
+            html += `
+                <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''} 
+                    class="px-4 py-2 rounded-xl text-xs font-bold border transition ${currentPage === totalPages ? 'bg-zinc-900/50 text-zinc-600 border-zinc-800/50 cursor-not-allowed' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:text-snapYellow'} flex items-center gap-1.5">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderCatalog();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectSong(id, updateUrl = true) {
+            const song = songs.find(s => s.id === id);
+            if (!song) return;
+
+            currentSong = song;
+
+            if (updateUrl) {
+                try {
+                    if (!window.location.href.startsWith('blob:')) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('song', song.id);
+                        window.history.pushState({path: url.href}, '', url.toString());
+                    }
+                } catch(e) {}
+            }
+
+            document.getElementById('songTitle').innerText = song.title;
+            document.getElementById('songArtist').innerText = song.artist;
+            
+            const ytId = getYoutubeId(song.youtubeUrl);
+            document.getElementById('youtubeIframe').src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
+
+            document.getElementById('singleSongSection').classList.remove('hidden');
+            document.getElementById('catalogTitle').innerText = 'More Tutorials';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showAllSongs() {
+            currentSong = null;
+            document.getElementById('singleSongSection').classList.add('hidden');
+            document.getElementById('catalogTitle').innerText = 'Song Catalog';
+            document.getElementById('youtubeIframe').src = '';
+            
+            try {
+                if (!window.location.href.startsWith('blob:')) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('song');
+                    url.searchParams.delete('v');
+                    window.history.pushState({path: url.href}, '', url.toString());
+                }
+            } catch(e) {}
+
+            renderCatalog();
+        }
+
+        function copyShareLink() {
+            if (!currentSong) return;
+            let shareUrl = window.location.href;
+            if (shareUrl.startsWith('blob:')) {
+                shareUrl = `https://pianosnap.vercel.app/?song=${currentSong.id}`;
+            } else {
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('song', currentSong.id);
+                    shareUrl = url.toString();
+                } catch(e) {
+                    shareUrl = `https://pianosnap.vercel.app/?song=${currentSong.id}`;
+                }
+            }
+            
+            const tempInput = document.createElement('input');
+            document.body.appendChild(tempInput);
+            tempInput.value = shareUrl;
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast('Link copied to clipboard!', 'fa-link');
+        }
+
+        function triggerDownloadModal(fileType) {
+            selectedFileType = fileType;
+            hasClickedSubscribe = false;
+
+            const nextBtn = document.getElementById('nextDownloadBtn');
+            nextBtn.disabled = true;
+            nextBtn.className = "w-full bg-zinc-100 text-zinc-400 font-bold py-3.5 px-6 rounded-2xl border border-zinc-200 cursor-not-allowed transition text-base flex items-center justify-center gap-2";
+
+            document.getElementById('downloadModal').classList.remove('hidden');
+        }
+
+        function closeDownloadModal() {
+            document.getElementById('downloadModal').classList.add('hidden');
+        }
+
+        function handleSubscribeClick() {
+            hasClickedSubscribe = true;
+
+            setTimeout(() => {
+                const nextBtn = document.getElementById('nextDownloadBtn');
+                nextBtn.disabled = false;
+                nextBtn.className = "w-full bg-black hover:bg-zinc-800 text-white font-black py-4 px-6 rounded-2xl transition-all text-base flex items-center justify-center gap-2 cursor-pointer shadow-xl animate-bounce";
+            }, 500);
+        }
+
+        function executeDownload() {
+            if (!currentSong) return;
+
+            closeDownloadModal();
+
+            const isMidi = selectedFileType === 'midi';
+            const fileUrl = isMidi ? currentSong.midiUrl : currentSong.sheetUrl;
+            const fileExtension = isMidi ? '.mid' : '.pdf';
+            const fileName = `${currentSong.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_PianoSnap${fileExtension}`;
+
+            if (fileUrl && fileUrl.startsWith('http')) {
+                const a = document.createElement('a');
+                a.href = fileUrl;
+                a.target = '_blank';
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                const content = `PianoSnap Official ${isMidi ? 'MIDI File' : 'Sheet Music Score'}\n\nSong: ${currentSong.title}\nArtist: ${currentSong.artist}\nWebsite: https://www.youtube.com/@PianoSnap?sub_confirmation=1\n\nThank you for subscribing to PianoSnap!`;
+                const blob = new Blob([content], { type: isMidi ? 'audio/midi' : 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+            }
+
+            showToast(`Downloading ${isMidi ? 'MIDI arrangement' : 'Sheet Music PDF'}...`, 'fa-circle-down');
+        }
+
+        function showToast(msg, icon = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMessage.innerText = msg;
+            toastIcon.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+
+            toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>

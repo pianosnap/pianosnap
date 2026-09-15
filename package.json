@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "build": "node -e \"import('fs').then(fs => { fs.mkdirSync('dist', { recursive: true }); fs.copyFileSync('index.html', 'dist/index.html'); console.log('Build complete'); })\"",
+    "build": "node build.js",
     "start": "node server.js"
   },
   "dependencies": {

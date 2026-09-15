@@ -1,0 +1,29 @@
+[
+  {
+    "id": "interstellar-main-theme",
+    "title": "Interstellar - Main Theme (First Step)",
+    "artist": "Hans Zimmer / Arr. PianoSnap",
+    "youtubeUrl": "https://www.youtube.com/watch?v=BYL30114i-U",
+    "midiUrl": "",
+    "sheetUrl": "",
+    "createdAt": 1700000000000
+  },
+  {
+    "id": "golden-hour-piano",
+    "title": "Golden Hour (Fast Piano Tutorial)",
+    "artist": "JVKE / PianoSnap",
+    "youtubeUrl": "https://www.youtube.com/watch?v=PEM0Vs8jf1w",
+    "midiUrl": "",
+    "sheetUrl": "",
+    "createdAt": 1700000100000
+  },
+  {
+    "id": "rush-e-easy-version",
+    "title": "Rush E - Easy & Fast Piano Tutorial",
+    "artist": "Sheet Music Boss / PianoSnap",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Q8P_xT62-P8",
+    "midiUrl": "",
+    "sheetUrl": "",
+    "createdAt": 1700000200000
+  }
+]
