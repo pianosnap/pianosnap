@@ -365,6 +365,41 @@
                     </div>
                 </div>
 
+                <!-- Persistence & Catalog Sync Bar -->
+                <div class="bg-zinc-900/90 border border-zinc-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                        </span>
+                        <div>
+                            <span class="text-xs font-bold text-white block">Salvataggio Locale Persistente Attivo</span>
+                            <p class="text-[11px] text-zinc-400">Tutte le modifiche, aggiunte ed eliminazioni restano salvate anche se ricarichi la pagina.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="exportSongsJson()" title="Scarica il file songs.json aggiornato" 
+                            class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-zinc-700/50">
+                            <i class="fa-solid fa-download text-snapYellow"></i>
+                            <span>Scarica songs.json</span>
+                        </button>
+
+                        <label for="importSongsFileInput" title="Carica catalogo da file JSON" 
+                            class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-zinc-700/50 cursor-pointer">
+                            <i class="fa-solid fa-upload text-blue-400"></i>
+                            <span>Importa JSON</span>
+                            <input type="file" id="importSongsFileInput" accept=".json" class="hidden" onchange="handleImportSongsJson(event)">
+                        </label>
+
+                        <button onclick="resetToDefaultSongs()" title="Ripristina le canzoni originali predefinite" 
+                            class="px-3 py-2 bg-zinc-900 hover:bg-red-950/60 text-zinc-400 hover:text-red-300 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-zinc-800 hover:border-red-800/40">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Ripristina Default</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Two Column Layout: Song Editor Form + Songs Catalog Management -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
@@ -423,18 +458,18 @@
                                 <label class="block text-xs font-semibold text-zinc-300 mb-1">
                                     Link File MIDI (opzionale)
                                 </label>
-                                <input type="text" id="inputMidiUrl" placeholder="URL diretto al file .mid (o lascia vuoto)" 
+                                <input type="text" id="inputMidiUrl" placeholder="es. /downloads/canzone.mid oppure link Google Drive / Dropbox" 
                                     class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
-                                <p class="text-[10px] text-zinc-500 mt-1">Se vuoto, il download genera un file di arrangiamento compatibile.</p>
+                                <p class="text-[10px] text-zinc-400 mt-1">Puoi inserire un percorso locale (es. <code class="text-snapYellow">/downloads/titolo.mid</code>) o link esterno (Google Drive, Dropbox, ecc.).</p>
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-zinc-300 mb-1">
                                     Link Spartito PDF / Immagine (opzionale)
                                 </label>
-                                <input type="text" id="inputSheetUrl" placeholder="URL diretto a file PDF / immagine spartito" 
+                                <input type="text" id="inputSheetUrl" placeholder="es. /downloads/canzone.pdf oppure link Google Drive / Dropbox" 
                                     class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
-                                <p class="text-[10px] text-zinc-500 mt-1">Se vuoto, il download genera una partitura ufficiale verificata.</p>
+                                <p class="text-[10px] text-zinc-400 mt-1">Puoi inserire un percorso locale (es. <code class="text-snapYellow">/downloads/titolo.pdf</code>) o link esterno (Google Drive, Dropbox, ecc.).</p>
                             </div>
 
                             <div class="flex items-center gap-3 pt-3">
@@ -718,29 +753,40 @@
         // DATA SYNC WITH BACKEND & LOCAL STORAGE
         // ==========================================
         async function fetchSongs() {
-            // First load from localStorage for instant display
             const stored = localStorage.getItem('pianosnap_songs');
+            const hasLocalModifications = Boolean(localStorage.getItem('pianosnap_songs_modified_at'));
+
             if (stored) {
                 try {
-                    songs = JSON.parse(stored);
-                } catch(e) {}
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        songs = parsed;
+                    }
+                } catch(e) {
+                    console.error('Error reading localStorage songs:', e);
+                }
             }
             if (!songs || songs.length === 0) {
                 songs = [...DEFAULT_SONGS];
+                saveLocalSongs(false);
             }
 
-            // Then fetch updated list from backend server
+            // Only attempt server fetch if the user hasn't explicitly customized songs locally,
+            // or fetch without overwriting user's local edits!
             try {
                 const res = await fetch('/api/songs');
                 if (res.ok) {
                     const data = await res.json();
                     if (data && Array.isArray(data.songs) && data.songs.length > 0) {
-                        songs = data.songs;
-                        localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                        // If user hasn't made local changes, update from server
+                        if (!hasLocalModifications) {
+                            songs = data.songs;
+                            localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                        }
                     }
                 }
             } catch (err) {
-                console.warn('API /api/songs fetch fallback to local cache:', err);
+                // Normal fallback on static hosting environments like Vercel
             }
 
             renderCatalog();
@@ -749,8 +795,65 @@
             }
         }
 
-        function saveLocalSongs() {
-            localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+        function saveLocalSongs(markModified = true) {
+            try {
+                localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                if (markModified) {
+                    localStorage.setItem('pianosnap_songs_modified_at', Date.now().toString());
+                }
+            } catch (e) {
+                console.error('Failed to save songs to localStorage:', e);
+            }
+        }
+
+        function exportSongsJson() {
+            const jsonStr = JSON.stringify(songs, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'songs.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('File songs.json scaricato con successo!', 'fa-circle-down');
+        }
+
+        function handleImportSongsJson(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported) && imported.length > 0) {
+                        songs = imported;
+                        saveLocalSongs(true);
+                        renderAdminDashboardData();
+                        renderCatalog();
+                        showToast(`Importate ${songs.length} canzoni con successo!`, 'fa-file-circle-check');
+                    } else {
+                        showToast('Il file JSON non contiene una lista valida di canzoni.', 'fa-triangle-exclamation');
+                    }
+                } catch (err) {
+                    showToast('Errore durante la lettura del file JSON.', 'fa-circle-xmark');
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function resetToDefaultSongs() {
+            if (confirm('Sei sicuro di voler ripristinare il catalogo alle canzoni predefinite di fabbrica? Tutte le modifiche locali verranno eliminate.')) {
+                songs = [...DEFAULT_SONGS];
+                localStorage.removeItem('pianosnap_songs_modified_at');
+                saveLocalSongs(false);
+                renderAdminDashboardData();
+                renderCatalog();
+                showToast('Catalogo ripristinato alle canzoni predefinite.', 'fa-rotate-left');
+            }
         }
 
         function getYoutubeId(url) {
@@ -1359,21 +1462,39 @@
             }, 500);
         }
 
+        function formatDownloadUrl(url) {
+            if (!url) return '';
+            let cleaned = url.trim();
+            // Google Drive direct download transformation
+            if (cleaned.includes('drive.google.com/file/d/')) {
+                const match = cleaned.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) {
+                    return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+                }
+            }
+            // Dropbox direct download transformation
+            if (cleaned.includes('dropbox.com') && cleaned.includes('dl=0')) {
+                return cleaned.replace('dl=0', 'dl=1');
+            }
+            return cleaned;
+        }
+
         function executeDownload() {
             if (!currentSong) return;
 
             closeDownloadModal();
 
             const isMidi = selectedFileType === 'midi';
-            const fileUrl = isMidi ? currentSong.midiUrl : currentSong.sheetUrl;
+            const rawFileUrl = (isMidi ? currentSong.midiUrl : currentSong.sheetUrl) || '';
+            const fileUrl = formatDownloadUrl(rawFileUrl);
             const fileExtension = isMidi ? '.mid' : '.pdf';
             const fileName = `${currentSong.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_PianoSnap${fileExtension}`;
 
-            if (fileUrl && fileUrl.startsWith('http')) {
+            if (fileUrl && fileUrl.trim() !== '') {
                 const a = document.createElement('a');
                 a.href = fileUrl;
                 a.target = '_blank';
-                a.download = fileName;
+                a.setAttribute('download', fileName);
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);

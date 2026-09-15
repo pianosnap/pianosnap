@@ -169,6 +169,10 @@ app.delete('/api/songs/:id', requireAdminAuth, (req, res) => {
 });
 
 // Static assets
+if (fs.existsSync(path.join(__dirname, 'public'))) {
+  app.use(express.static(path.join(__dirname, 'public')));
+}
+
 const staticDir = fs.existsSync(path.join(__dirname, 'dist', 'index.html'))
   ? path.join(__dirname, 'dist')
   : __dirname;

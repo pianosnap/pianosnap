@@ -10,6 +10,8 @@ fs.mkdirSync(publicDir, { recursive: true });
 fs.mkdirSync(distDir, { recursive: true });
 fs.mkdirSync(path.join(publicDir, 'admin'), { recursive: true });
 fs.mkdirSync(path.join(distDir, 'admin'), { recursive: true });
+fs.mkdirSync(path.join(publicDir, 'downloads'), { recursive: true });
+fs.mkdirSync(path.join(distDir, 'downloads'), { recursive: true });
 
 // Copy index.html
 const indexHtml = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf-8');
