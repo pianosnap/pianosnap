@@ -444,15 +444,15 @@
                                 <label class="block text-xs font-semibold text-zinc-300 mb-1">
                                     Link Video YouTube o Video ID <span class="text-snapYellow">*</span>
                                 </label>
-                                <input type="text" id="inputYoutube" required oninput="updateThumbnailPreview(this.value)" placeholder="es. https://www.youtube.com/watch?v=BYL30114i-U" 
+                                <input type="text" id="inputYoutube" required oninput="updateThumbnailPreview(this.value)" placeholder="es. https://www.youtube.com/watch?v=45DGFR0Gv4Y" 
                                     class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-snapYellow transition">
                                 
                                 <!-- Live Thumbnail Preview -->
                                 <div class="mt-2.5 p-2 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-3">
-                                    <img id="formThumbnailPreview" src="https://img.youtube.com/vi/BYL30114i-U/hqdefault.jpg" alt="Anteprima" class="w-16 h-10 object-cover rounded-lg bg-black">
+                                    <img id="formThumbnailPreview" src="https://img.youtube.com/vi/45DGFR0Gv4Y/hqdefault.jpg" alt="Anteprima" class="w-16 h-10 object-cover rounded-lg bg-black" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 400 225\' fill=\'%23121216\'%3E%3Crect width=\'400\' height=\'225\' fill=\'%23121216\'/%3E%3Ccircle cx=\'200\' cy=\'100\' r=\'32\' fill=\'%23ffe500\'/%3E%3Cpolygon points=\'194,86 214,100 194,114\' fill=\'%23000\'/%3E%3Ctext x=\'200\' y=\'160\' fill=\'%23ffe500\' font-family=\'sans-serif\' font-size=\'16\' font-weight=\'bold\' text-anchor=\'middle\'%3EPIANOSNAP%3C/text%3E%3C/svg%3E'">
                                     <div class="text-[11px] text-zinc-400">
                                         <span class="text-zinc-300 font-medium block">Anteprima miniatura YouTube</span>
-                                        <span id="previewVideoIdText" class="text-snapYellow font-mono">ID: BYL30114i-U</span>
+                                        <span id="previewVideoIdText" class="text-snapYellow font-mono">ID: 45DGFR0Gv4Y</span>
                                     </div>
                                 </div>
                             </div>
@@ -658,7 +658,7 @@
                 id: 'interstellar-main-theme',
                 title: 'Interstellar - Main Theme (First Step)',
                 artist: 'Hans Zimmer / Arr. PianoSnap',
-                youtubeUrl: 'https://www.youtube.com/watch?v=BYL30114i-U',
+                youtubeUrl: 'https://www.youtube.com/watch?v=45DGFR0Gv4Y',
                 midiUrl: '',
                 sheetUrl: '',
                 createdAt: 1700000000000
@@ -682,6 +682,8 @@
                 createdAt: 1700000200000
             }
         ];
+
+        const PIANO_THUMB_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225' fill='%23121216'%3E%3Crect width='400' height='225' fill='%23121216'/%3E%3Ccircle cx='200' cy='100' r='32' fill='%23ffe500'/%3E%3Cpolygon points='194,86 214,100 194,114' fill='%23000'/%3E%3Ctext x='200' y='160' fill='%23ffe500' font-family='sans-serif' font-size='16' font-weight='bold' text-anchor='middle'%3EPIANOSNAP%3C/text%3E%3C/svg%3E";
 
         // State variables
         let songs = [];
@@ -804,7 +806,12 @@
                 try {
                     const parsed = JSON.parse(stored);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        songs = parsed;
+                        songs = parsed.map(s => {
+                            if (s && s.youtubeUrl && s.youtubeUrl.includes('BYL30114i-U')) {
+                                return { ...s, youtubeUrl: 'https://www.youtube.com/watch?v=45DGFR0Gv4Y' };
+                            }
+                            return s;
+                        });
                     }
                 } catch(e) {
                     console.error('Error reading localStorage songs:', e);
@@ -838,7 +845,12 @@
 
                     const firestoreSongs = [];
                     snapshot.forEach((docSnap) => {
-                        firestoreSongs.push({ id: docSnap.id, ...docSnap.data() });
+                        const songData = { id: docSnap.id, ...docSnap.data() };
+                        if (songData.youtubeUrl && songData.youtubeUrl.includes('BYL30114i-U')) {
+                            songData.youtubeUrl = 'https://www.youtube.com/watch?v=45DGFR0Gv4Y';
+                            setDoc(doc(db, 'songs', songData.id), songData, { merge: true }).catch(() => {});
+                        }
+                        firestoreSongs.push(songData);
                     });
 
                     // Sort newest first
@@ -926,11 +938,17 @@
         }
 
         function getYoutubeId(url) {
-            if (!url) return 'BYL30114i-U';
-            if (url.length === 11 && !url.includes('/') && !url.includes('?')) return url;
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : 'BYL30114i-U';
+            if (!url) return '45DGFR0Gv4Y';
+            const clean = String(url).trim();
+            if (clean.length === 11 && !clean.includes('/') && !clean.includes('?') && !clean.includes('&')) {
+                return clean;
+            }
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = clean.match(regExp);
+            if (match && match[2].length === 11) {
+                return match[2];
+            }
+            return '45DGFR0Gv4Y';
         }
 
         // ==========================================
@@ -1029,8 +1047,18 @@
 
         function updateThumbnailPreview(url) {
             const ytId = getYoutubeId(url);
-            document.getElementById('formThumbnailPreview').src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-            document.getElementById('previewVideoIdText').innerText = `ID: ${ytId}`;
+            const imgEl = document.getElementById('formThumbnailPreview');
+            const txtEl = document.getElementById('previewVideoIdText');
+            if (imgEl) {
+                imgEl.src = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                imgEl.onerror = () => {
+                    imgEl.onerror = null;
+                    imgEl.src = PIANO_THUMB_FALLBACK;
+                };
+            }
+            if (txtEl) {
+                txtEl.innerText = `ID: ${ytId}`;
+            }
         }
 
         function handleAdminSearch(query) {
@@ -1070,7 +1098,7 @@
                 item.innerHTML = `
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="relative w-16 h-11 bg-black rounded-lg overflow-hidden shrink-0 border border-zinc-800">
-                            <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover">
+                            <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${PIANO_THUMB_FALLBACK}'">
                             <a href="${song.youtubeUrl}" target="_blank" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-snapYellow text-xs" title="Guarda su YouTube">
                                 <i class="fa-brands fa-youtube text-red-500 text-sm"></i>
                             </a>
@@ -1118,49 +1146,82 @@
             const song = songs.find(s => s.id === id);
             if (!song) return;
 
-            document.getElementById('editSongId').value = song.id;
-            document.getElementById('inputTitle').value = song.title;
-            document.getElementById('inputArtist').value = song.artist;
-            document.getElementById('inputYoutube').value = song.youtubeUrl;
-            document.getElementById('inputMidiUrl').value = song.midiUrl || '';
-            document.getElementById('inputSheetUrl').value = song.sheetUrl || '';
+            const editIdEl = document.getElementById('editSongId');
+            if (editIdEl) editIdEl.value = song.id;
+            const titleEl = document.getElementById('inputTitle');
+            if (titleEl) titleEl.value = song.title;
+            const artistEl = document.getElementById('inputArtist');
+            if (artistEl) artistEl.value = song.artist;
+            const ytEl = document.getElementById('inputYoutube');
+            if (ytEl) ytEl.value = song.youtubeUrl;
+            const midiEl = document.getElementById('inputMidiUrl');
+            if (midiEl) midiEl.value = song.midiUrl || '';
+            const sheetEl = document.getElementById('inputSheetUrl');
+            if (sheetEl) sheetEl.value = song.sheetUrl || '';
 
             updateThumbnailPreview(song.youtubeUrl);
 
-            document.getElementById('formSectionTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-snapYellow"></i> <span>Modifica Canzone</span>`;
-            document.getElementById('editingModeBadge').classList.remove('hidden');
-            document.getElementById('saveBtnText').innerText = 'Aggiorna Canzone';
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            const formTitle = document.getElementById('formSectionTitle');
+            if (formTitle) formTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-snapYellow"></i> <span>Modifica Canzone</span>`;
+            
+            const badge = document.getElementById('editingModeBadge');
+            if (badge) badge.classList.remove('hidden');
+
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+            const submitBtn = document.getElementById('saveSongSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> <span id="saveBtnText">Aggiorna Canzone</span>`;
+            }
 
             // Scroll to form smoothly
-            document.getElementById('songForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            document.getElementById('inputTitle').focus();
+            const form = document.getElementById('songForm');
+            if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (titleEl) titleEl.focus();
         }
 
         function resetSongForm() {
-            document.getElementById('editSongId').value = '';
-            document.getElementById('inputTitle').value = '';
-            document.getElementById('inputArtist').value = '';
-            document.getElementById('inputYoutube').value = '';
-            document.getElementById('inputMidiUrl').value = '';
-            document.getElementById('inputSheetUrl').value = '';
+            const editIdEl = document.getElementById('editSongId');
+            if (editIdEl) editIdEl.value = '';
+            const titleEl = document.getElementById('inputTitle');
+            if (titleEl) titleEl.value = '';
+            const artistEl = document.getElementById('inputArtist');
+            if (artistEl) artistEl.value = '';
+            const ytEl = document.getElementById('inputYoutube');
+            if (ytEl) ytEl.value = '';
+            const midiEl = document.getElementById('inputMidiUrl');
+            if (midiEl) midiEl.value = '';
+            const sheetEl = document.getElementById('inputSheetUrl');
+            if (sheetEl) sheetEl.value = '';
 
-            updateThumbnailPreview('BYL30114i-U');
+            updateThumbnailPreview('45DGFR0Gv4Y');
 
-            document.getElementById('formSectionTitle').innerHTML = `<i class="fa-solid fa-plus-circle text-snapYellow"></i> <span>Aggiungi Nuova Canzone</span>`;
-            document.getElementById('editingModeBadge').classList.add('hidden');
-            document.getElementById('saveBtnText').innerText = 'Salva Canzone';
-            document.getElementById('cancelEditBtn').classList.add('hidden');
+            const formTitle = document.getElementById('formSectionTitle');
+            if (formTitle) formTitle.innerHTML = `<i class="fa-solid fa-plus-circle text-snapYellow"></i> <span>Aggiungi Nuova Canzone</span>`;
+            
+            const badge = document.getElementById('editingModeBadge');
+            if (badge) badge.classList.add('hidden');
+
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            if (cancelBtn) cancelBtn.classList.add('hidden');
+
+            const submitBtn = document.getElementById('saveSongSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> <span id="saveBtnText">Salva Canzone</span>`;
+            }
         }
 
         async function handleSaveSong(e) {
             e.preventDefault();
-            const editId = document.getElementById('editSongId').value;
-            const title = document.getElementById('inputTitle').value.trim();
-            const artist = document.getElementById('inputArtist').value.trim();
-            const youtubeUrl = document.getElementById('inputYoutube').value.trim();
-            const midiUrl = document.getElementById('inputMidiUrl').value.trim();
-            const sheetUrl = document.getElementById('inputSheetUrl').value.trim();
+            const editId = document.getElementById('editSongId') ? document.getElementById('editSongId').value : '';
+            const title = document.getElementById('inputTitle') ? document.getElementById('inputTitle').value.trim() : '';
+            const artist = document.getElementById('inputArtist') ? document.getElementById('inputArtist').value.trim() : '';
+            const youtubeUrl = document.getElementById('inputYoutube') ? document.getElementById('inputYoutube').value.trim() : '';
+            const midiUrl = document.getElementById('inputMidiUrl') ? document.getElementById('inputMidiUrl').value.trim() : '';
+            const sheetUrl = document.getElementById('inputSheetUrl') ? document.getElementById('inputSheetUrl').value.trim() : '';
 
             if (!title || !artist || !youtubeUrl) {
                 showToast('Compila tutti i campi obbligatori!', 'fa-circle-exclamation');
@@ -1168,8 +1229,10 @@
             }
 
             const submitBtn = document.getElementById('saveSongSubmitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvataggio Cloud...</span>`;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvataggio Cloud...</span>`;
+            }
 
             const songId = editId || (title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString().slice(-4));
             const existingSong = editId ? songs.find(s => s.id === editId) : null;
@@ -1205,23 +1268,7 @@
                 showToast(editId ? 'Canzone aggiornata con successo!' : 'Nuova canzone aggiunta in Home!', 'fa-circle-check');
             }
 
-            // 2. Notify local server API if running in background
-            try {
-                const apiEndpoint = editId ? `/api/songs/${editId}` : '/api/songs';
-                const apiMethod = editId ? 'PUT' : 'POST';
-                fetch(apiEndpoint, {
-                    method: apiMethod,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                    },
-                    body: JSON.stringify(songData)
-                }).catch(() => {});
-            } catch (e) {}
-
             resetSongForm();
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> <span id="saveBtnText">Salva Canzone</span>`;
         }
 
         // ==========================================
@@ -1260,23 +1307,14 @@
                 showToast('Canzone eliminata.', 'fa-trash');
             }
 
-            // 2. Notify local server API if active
-            try {
-                fetch(`/api/songs/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                    }
-                }).catch(() => {});
-            } catch (err) {}
-
             // If deleted song is current selected song, clear it
             if (currentSong && currentSong.id === id) {
                 showAllSongs();
             }
 
             // If editing this song, reset form
-            if (document.getElementById('editSongId').value === id) {
+            const editIdEl = document.getElementById('editSongId');
+            if (editIdEl && editIdEl.value === id) {
                 resetSongForm();
             }
         }
@@ -1348,7 +1386,7 @@
                 card.innerHTML = `
                     <div>
                         <div class="relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer" onclick="selectSong('${song.id}')">
-                            <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/111/ffe500?text=PianoSnap'">
+                            <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='${PIANO_THUMB_FALLBACK}'">
                             <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                                 <div class="w-12 h-12 rounded-full bg-snapYellow/90 text-black flex items-center justify-center text-xl font-black shadow-lg transform group-hover:scale-110 transition-transform">
                                     <i class="fa-solid fa-play ml-1"></i>

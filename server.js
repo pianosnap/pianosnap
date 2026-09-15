@@ -19,7 +19,7 @@ const INITIAL_SONGS = [
     id: 'interstellar-main-theme',
     title: 'Interstellar - Main Theme (First Step)',
     artist: 'Hans Zimmer / Arr. PianoSnap',
-    youtubeUrl: 'https://www.youtube.com/watch?v=BYL30114i-U',
+    youtubeUrl: 'https://www.youtube.com/watch?v=45DGFR0Gv4Y',
     midiUrl: '',
     sheetUrl: '',
     createdAt: 1700000000000
