@@ -9,7 +9,7 @@
     <meta property="og:description" content="Learn piano fast with YouTube tutorials, downloadable MIDI arrangements, and printable sheet music.">
     
     <!-- Favicon SVG -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23000'/><path d='M30 25h40v50H30z' fill='%23ffe500'/><path d='M45 25h10v30H45z' fill='%23000'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="/piano-icon.svg">
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -78,9 +78,21 @@
                 
                 <!-- Logo & Brand Subtitle -->
                 <a href="/" onclick="handleHomeLogoClick(event)" class="flex items-center gap-3 group">
-                    <div class="relative w-12 h-12 bg-black border-2 border-snapYellow rounded-xl flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-105 transition-transform">
-                        <span class="font-display font-black text-2xl text-white tracking-tighter">P</span>
-                        <i class="fa-solid font-black fa-bolt text-snapYellow text-xl absolute -right-1 bottom-1 transform -rotate-12"></i>
+                    <div class="relative w-12 h-12 bg-black border-2 border-snapYellow rounded-xl flex items-center justify-center overflow-hidden shadow-lg group-hover:scale-105 transition-transform p-1 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" class="w-full h-full object-contain rounded-lg">
+                            <!-- Outer Rounded Square Background Frame -->
+                            <rect x="26" y="26" width="460" height="460" rx="92" fill="#FFFFFF" stroke="#211b22" stroke-width="34" stroke-linejoin="round"/>
+                            <!-- 3D Lower Shelf / Shadow on White Keys -->
+                            <path d="M43 388 C 43 436, 74 469, 122 469 L 390 469 C 438 469, 469 436, 469 388 L 469 414 C 469 458, 432 470, 390 470 L 122 470 C 80 470, 43 458, 43 414 Z" fill="#b7b8bb"/>
+                            <!-- 3 Key Dividers -->
+                            <line x1="151" y1="285" x2="151" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+                            <line x1="256" y1="285" x2="256" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+                            <line x1="361" y1="285" x2="361" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+                            <!-- 3 Black Keys with rounded bottoms -->
+                            <rect x="115" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+                            <rect x="220" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+                            <rect x="325" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+                        </svg>
                     </div>
                     <div class="flex flex-col">
                         <div class="flex items-center gap-1.5">
@@ -190,7 +202,7 @@
                     </span>
                 </div>
 
-                <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+                <div id="sortControlsContainer" class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
                     <div class="flex items-center gap-2 bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800 text-xs text-zinc-300">
                         <i class="fa-solid fa-arrow-down-short-wide text-snapYellow"></i>
                         <label for="sortSelect" class="font-medium whitespace-nowrap">Sort by:</label>
@@ -209,7 +221,7 @@
                         <i class="fa-brands fa-youtube"></i>
                     </div>
                     <p class="text-sm font-semibold text-zinc-200">
-                        Subscribe to the PianoSnap YouTube channel to download free MIDI files and sheet music.
+                        Subscribe to the PianoSnap YouTube channel to support my work—it's free!
                     </p>
                 </div>
                 <a href="https://www.youtube.com/@PianoSnap?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="self-start sm:self-auto px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 shadow shadow-red-600/20 active:scale-95">
@@ -276,8 +288,17 @@
         <header class="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-snapYellow text-black rounded-xl flex items-center justify-center font-black text-xl shadow-lg">
-                        <i class="fa-solid fa-lock"></i>
+                    <div class="relative w-10 h-10 bg-black border-2 border-snapYellow rounded-xl flex items-center justify-center overflow-hidden shadow-lg p-0.5 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" class="w-full h-full object-contain rounded-md">
+                            <rect x="26" y="26" width="460" height="460" rx="92" fill="#FFFFFF" stroke="#211b22" stroke-width="34" stroke-linejoin="round"/>
+                            <path d="M43 388 C 43 436, 74 469, 122 469 L 390 469 C 438 469, 469 436, 469 388 L 469 414 C 469 458, 432 470, 390 470 L 122 470 C 80 470, 43 458, 43 414 Z" fill="#b7b8bb"/>
+                            <line x1="151" y1="285" x2="151" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+                            <line x1="256" y1="285" x2="256" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+                            <line x1="361" y1="285" x2="361" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+                            <rect x="115" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+                            <rect x="220" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+                            <rect x="325" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+                        </svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
@@ -850,6 +871,7 @@
             getDocFromServer,
             setDoc, 
             deleteDoc, 
+            getDocs,
             onSnapshot 
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -879,35 +901,12 @@
         }
         testConnection();
 
-        const DEFAULT_SONGS = [
-            {
-                id: 'interstellar-main-theme',
-                title: 'Interstellar - Main Theme (First Step)',
-                artist: 'Hans Zimmer / Arr. PianoSnap',
-                youtubeUrl: 'https://www.youtube.com/watch?v=45DGFR0Gv4Y',
-                midiUrl: '',
-                sheetUrl: '',
-                createdAt: 1700000000000
-            },
-            {
-                id: 'golden-hour-piano',
-                title: 'Golden Hour (Fast Piano Tutorial)',
-                artist: 'JVKE / PianoSnap',
-                youtubeUrl: 'https://www.youtube.com/watch?v=PEM0Vs8jf1w',
-                midiUrl: '',
-                sheetUrl: '',
-                createdAt: 1700000100000
-            },
-            {
-                id: 'rush-e-easy-version',
-                title: 'Rush E - Easy & Fast Piano Tutorial',
-                artist: 'Sheet Music Boss / PianoSnap',
-                youtubeUrl: 'https://www.youtube.com/watch?v=Q8P_xT62-P8',
-                midiUrl: '',
-                sheetUrl: '',
-                createdAt: 1700000200000
-            }
-        ];
+        const DEFAULT_SONGS = [];
+        const DUMMY_IDS = new Set([
+            'interstellar-main-theme',
+            'golden-hour-piano',
+            'rush-e-easy-version'
+        ]);
 
         const PIANO_THUMB_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225' fill='%23121216'%3E%3Crect width='400' height='225' fill='%23121216'/%3E%3Ccircle cx='200' cy='100' r='32' fill='%23ffe500'/%3E%3Cpolygon points='194,86 214,100 194,114' fill='%23000'/%3E%3Ctext x='200' y='160' fill='%23ffe500' font-family='sans-serif' font-size='16' font-weight='bold' text-anchor='middle'%3EPIANOSNAP%3C/text%3E%3C/svg%3E";
 
@@ -944,6 +943,20 @@
 
         async function initApp() {
             checkCookieConsent();
+            // Purge any legacy dummy songs from localStorage
+            try {
+                const stored = localStorage.getItem('pianosnap_songs');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        songs = parsed.filter(s => !DUMMY_IDS.has(s.id));
+                        localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                    }
+                }
+            } catch (e) {
+                songs = [];
+            }
+
             // Show initial loading state in catalog while waiting for Firestore
             renderCatalog();
             checkRoute();
@@ -1051,7 +1064,7 @@
                         return;
                     }
                 }
-                showAllSongs();
+                showAllSongs(false);
             }
         }
 
@@ -1107,46 +1120,48 @@
                 // Fallback timeout in case Firestore is unreachable (e.g. offline preview)
                 const offlineFallbackTimer = setTimeout(() => {
                     if (isInitialLoading) {
-                        console.warn("Firestore listener pending, loading cached or default songs...");
                         isInitialLoading = false;
                         const stored = localStorage.getItem('pianosnap_songs');
                         if (stored) {
                             try {
                                 const parsed = JSON.parse(stored);
-                                if (Array.isArray(parsed) && parsed.length > 0) {
-                                    songs = parsed;
+                                if (Array.isArray(parsed)) {
+                                    songs = parsed.filter(s => !DUMMY_IDS.has(s.id));
                                 }
-                            } catch (e) {}
-                        }
-                        if (!songs || songs.length === 0) {
-                            songs = [...DEFAULT_SONGS];
+                            } catch (e) {
+                                songs = [];
+                            }
+                        } else {
+                            songs = [];
                         }
                         renderCatalog();
                         if (adminToken) renderAdminDashboardData();
                     }
-                }, 3500);
+                }, 3000);
 
                 onSnapshot(songsCol, async (snapshot) => {
                     clearTimeout(offlineFallbackTimer);
                     isInitialLoading = false;
 
                     if (snapshot.empty) {
-                        console.log("Firestore collection empty, seeding initial default songs...");
-                        try {
-                            for (const s of DEFAULT_SONGS) {
-                                await setDoc(doc(db, 'songs', s.id), s);
-                            }
-                        } catch(err) {
-                            console.warn("Could not seed initial songs into Firestore:", err);
-                            songs = [...DEFAULT_SONGS];
-                            renderCatalog();
-                            if (adminToken) renderAdminDashboardData();
+                        songs = [];
+                        localStorage.setItem('pianosnap_songs', JSON.stringify([]));
+                        renderCatalog();
+                        if (adminToken) renderAdminDashboardData();
+                        const dbStatus = document.getElementById('databaseStatusText');
+                        if (dbStatus) {
+                            dbStatus.innerText = 'Database Cloud Firebase Attivo (0 canzoni - pronto per nuovi tutorial)';
                         }
                         return;
                     }
 
                     const firestoreSongs = [];
+                    const deleteDummyPromises = [];
                     snapshot.forEach((docSnap) => {
+                        if (DUMMY_IDS.has(docSnap.id)) {
+                            deleteDummyPromises.push(deleteDoc(doc(db, 'songs', docSnap.id)).catch(() => {}));
+                            return;
+                        }
                         const songData = { id: docSnap.id, ...docSnap.data() };
                         if (songData.youtubeUrl && songData.youtubeUrl.includes('BYL30114i-U')) {
                             songData.youtubeUrl = 'https://www.youtube.com/watch?v=45DGFR0Gv4Y';
@@ -1154,6 +1169,10 @@
                         }
                         firestoreSongs.push(songData);
                     });
+
+                    if (deleteDummyPromises.length > 0) {
+                        Promise.all(deleteDummyPromises).catch(() => {});
+                    }
 
                     // Sort newest first
                     firestoreSongs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1178,13 +1197,14 @@
                     if (stored) {
                         try {
                             const parsed = JSON.parse(stored);
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                                songs = parsed;
+                            if (Array.isArray(parsed)) {
+                                songs = parsed.filter(s => !DUMMY_IDS.has(s.id));
                             }
-                        } catch (e) {}
-                    }
-                    if (!songs || songs.length === 0) {
-                        songs = [...DEFAULT_SONGS];
+                        } catch (e) {
+                            songs = [];
+                        }
+                    } else {
+                        songs = [];
                     }
                     renderCatalog();
                     if (adminToken) renderAdminDashboardData();
@@ -1221,25 +1241,79 @@
             showToast('File songs.json scaricato con successo!', 'fa-circle-down');
         }
 
-        function handleImportSongsJson(event) {
+        async function handleImportSongsJson(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported) && imported.length > 0) {
-                        songs = imported;
-                        saveLocalSongs(true);
-                        renderAdminDashboardData();
-                        renderCatalog();
-                        showToast(`Importate ${songs.length} canzoni con successo!`, 'fa-file-circle-check');
-                    } else {
+                    if (!Array.isArray(imported) || imported.length === 0) {
                         showToast('Il file JSON non contiene una lista valida di canzoni.', 'fa-triangle-exclamation');
+                        event.target.value = '';
+                        return;
                     }
+
+                    showToast('Sovrascrittura catalogo in corso...', 'fa-spinner fa-spin');
+
+                    // Standardize every song object
+                    const cleanImported = imported.map((item, idx) => {
+                        const rawId = item.id || (item.title ? item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
+                        const finalId = (rawId || `song-${idx}-${Date.now().toString().slice(-4)}`).trim();
+                        return {
+                            id: finalId,
+                            title: String(item.title || 'Untitled Song').trim(),
+                            artist: String(item.artist || 'PianoSnap').trim(),
+                            youtubeUrl: String(item.youtubeUrl || item.youtube || 'https://www.youtube.com/watch?v=45DGFR0Gv4Y').trim(),
+                            midiUrl: String(item.midiUrl || item.midi || '').trim(),
+                            sheetUrl: String(item.sheetUrl || item.sheet || '').trim(),
+                            createdAt: Number(item.createdAt) || (Date.now() - idx * 1000)
+                        };
+                    });
+
+                    // 1. Full overwrite on Firestore: delete all current songs and insert imported songs
+                    try {
+                        const songsCol = collection(db, 'songs');
+                        const existingSnap = await getDocs(songsCol);
+                        const deletePromises = [];
+                        existingSnap.forEach(docSnap => {
+                            deletePromises.push(deleteDoc(doc(db, 'songs', docSnap.id)));
+                        });
+                        await Promise.all(deletePromises);
+
+                        const writePromises = [];
+                        for (const song of cleanImported) {
+                            writePromises.push(setDoc(doc(db, 'songs', song.id), song));
+                        }
+                        await Promise.all(writePromises);
+                    } catch (fsErr) {
+                        console.warn('Firestore overwrite notice:', fsErr);
+                    }
+
+                    // 2. Full overwrite on server API songs.json
+                    try {
+                        await fetch('/api/songs/import', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                            },
+                            body: JSON.stringify({ songs: cleanImported })
+                        });
+                    } catch (srvErr) {
+                        console.warn('Server import sync notice:', srvErr);
+                    }
+
+                    // 3. Update local songs and storage
+                    songs = cleanImported;
+                    saveLocalSongs(true);
+                    renderAdminDashboardData();
+                    renderCatalog();
+                    showToast(`Catalogo sovrascritto con successo! (${songs.length} canzoni)`, 'fa-check-double');
                 } catch (err) {
-                    showToast('Errore durante la lettura del file JSON.', 'fa-circle-xmark');
+                    console.error('JSON import error:', err);
+                    showToast('Errore durante la lettura o importazione del file JSON.', 'fa-circle-xmark');
                 }
                 event.target.value = '';
             };
@@ -1406,6 +1480,22 @@
             if (totalCount === 0) {
                 container.innerHTML = '';
                 emptyNotice.classList.remove('hidden');
+                if (songs.length === 0) {
+                    emptyNotice.innerHTML = `
+                        <div class="py-6 flex flex-col items-center justify-center text-center">
+                            <div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 text-snapYellow flex items-center justify-center mb-3 text-xl">
+                                <i class="fa-solid fa-music"></i>
+                            </div>
+                            <span class="text-sm font-bold text-white block mb-1">Nessuna canzone nel catalogo</span>
+                            <span class="text-xs text-zinc-400 max-w-xs block">Il catalogo è vuoto e pronto per le tue canzoni vere. Inseriscile con il modulo a sinistra o importa un file JSON.</span>
+                        </div>
+                    `;
+                } else {
+                    emptyNotice.innerHTML = `
+                        <i class="fa-solid fa-circle-question text-2xl mb-2 block"></i>
+                        Nessuna canzone trovata per questa ricerca.
+                    `;
+                }
                 if (paginationContainer) paginationContainer.classList.add('hidden');
                 return;
             } else {
@@ -1638,20 +1728,47 @@
                 showToast(editId ? 'Canzone aggiornata nel Cloud per tutti i visitatori!' : 'Nuova canzone pubblicata nel Cloud per tutti i visitatori!', 'fa-cloud-arrow-up');
             } catch (firestoreErr) {
                 console.warn('Firestore write failed, saving locally:', firestoreErr);
-                // Fallback local update
-                if (editId) {
-                    const idx = songs.findIndex(s => s.id === editId);
-                    if (idx !== -1) {
-                        songs[idx] = songData;
-                    }
-                } else {
-                    songs.unshift(songData);
-                }
-                saveLocalSongs();
-                renderAdminDashboardData();
-                renderCatalog();
-                showToast(editId ? 'Canzone aggiornata con successo!' : 'Nuova canzone aggiunta in Home!', 'fa-circle-check');
+                showToast(editId ? 'Canzone aggiornata localmente.' : 'Nuova canzone aggiunta alla lista.', 'fa-circle-check');
             }
+
+            // 2. Server API Sync (keeps server songs.json in sync)
+            try {
+                if (!editId) {
+                    await fetch('/api/songs', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                        },
+                        body: JSON.stringify(songData)
+                    });
+                } else {
+                    await fetch(`/api/songs/${songId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                        },
+                        body: JSON.stringify(songData)
+                    });
+                }
+            } catch (srvErr) {
+                console.warn('Server sync notice:', srvErr);
+            }
+
+            // 3. Update local array: Append to existing list, NEVER overwrite!
+            if (editId) {
+                const idx = songs.findIndex(s => s.id === editId);
+                if (idx !== -1) {
+                    songs[idx] = songData;
+                }
+            } else {
+                // Ensure all existing songs are preserved, prepend the new song
+                songs = [songData, ...songs.filter(s => s.id !== songId)];
+            }
+            saveLocalSongs(true);
+            renderAdminDashboardData();
+            renderCatalog();
 
             resetSongForm();
         }
@@ -1742,6 +1859,77 @@
                 return;
             }
 
+            const sortContainer = document.getElementById('sortControlsContainer');
+            const catalogTitle = document.getElementById('catalogTitle');
+
+            // When a single song is open: show strictly the last 5 songs uploaded to the site, nothing else!
+            if (currentSong) {
+                if (sortContainer) sortContainer.classList.add('hidden');
+                if (catalogTitle) catalogTitle.innerText = 'Latest Tutorials';
+
+                // Sort all songs newest first
+                const sortedAll = [...songs].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                // Only the last 5 songs uploaded to the site, excluding the current active song if possible
+                let pageSongs = sortedAll.filter(s => s.id !== currentSong.id).slice(0, 5);
+                if (pageSongs.length === 0) {
+                    pageSongs = sortedAll.slice(0, 5);
+                }
+
+                if (countBadge) {
+                    countBadge.innerText = `${pageSongs.length} ${pageSongs.length === 1 ? 'Latest Tutorial' : 'Latest Tutorials'}`;
+                }
+
+                if (pageSongs.length === 0) {
+                    grid.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    paginationContainer.classList.add('hidden');
+                    return;
+                } else {
+                    emptyState.classList.add('hidden');
+                }
+
+                grid.innerHTML = '';
+                pageSongs.forEach(song => {
+                    const ytId = getYoutubeId(song.youtubeUrl);
+                    const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-snapCard rounded-2xl border border-zinc-800/80 overflow-hidden hover:border-snapYellow/80 transition-all duration-300 group flex flex-col justify-between shadow-lg hover:shadow-2xl';
+                    card.innerHTML = `
+                        <div>
+                            <div class="relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer" onclick="selectSong('${song.id}')">
+                                <img src="${thumbUrl}" alt="${song.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='${PIANO_THUMB_FALLBACK}'">
+                                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                    <div class="w-12 h-12 rounded-full bg-snapYellow/90 text-black flex items-center justify-center text-xl font-black shadow-lg transform group-hover:scale-110 transition-transform">
+                                        <i class="fa-solid fa-play ml-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-5">
+                                <h4 class="font-display font-bold text-lg text-white group-hover:text-snapYellow transition-colors line-clamp-1 mb-1">${song.title}</h4>
+                                <p class="text-xs text-zinc-400 line-clamp-1 mb-4">${song.artist}</p>
+                            </div>
+                        </div>
+
+                        <div class="px-5 pb-5 pt-0 flex items-center gap-2">
+                            <button onclick="selectSong('${song.id}')" class="flex-1 bg-snapYellow hover:bg-snapYellowDark text-black font-extrabold text-xs py-3 px-4 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg uppercase tracking-wider">
+                                <i class="fa-solid fa-download"></i> DOWNLOAD
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                // Under the song player: show ONLY the 5 latest songs, no pagination!
+                paginationContainer.classList.add('hidden');
+                return;
+            }
+
+            // Normal Home catalog view with all songs, sort, and pagination
+            if (sortContainer) sortContainer.classList.remove('hidden');
+            if (catalogTitle) catalogTitle.innerText = 'Song Catalog';
+
             let filtered = songs;
             if (currentSearchQuery) {
                 filtered = songs.filter(s => 
@@ -1763,6 +1951,23 @@
                 grid.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 paginationContainer.classList.add('hidden');
+                if (songs.length === 0) {
+                    emptyState.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 text-snapYellow flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fa-solid fa-music"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-1">No songs in the catalog yet</h4>
+                        <p class="text-sm text-zinc-400 max-w-md mx-auto mb-2">The catalog is currently empty. New tutorials and arrangements will appear here soon!</p>
+                    `;
+                } else {
+                    emptyState.innerHTML = `
+                        <div class="w-16 h-16 rounded-full bg-zinc-900 text-zinc-500 flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fa-solid fa-music"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-1">No songs found</h4>
+                        <p class="text-sm text-zinc-500 max-w-sm mx-auto mb-4">Try searching for another song title or artist.</p>
+                    `;
+                }
                 return;
             } else {
                 emptyState.classList.add('hidden');
@@ -1882,25 +2087,28 @@
             document.getElementById('youtubeIframe').src = `https://www.youtube.com/embed/${ytId}?autoplay=1`;
 
             document.getElementById('singleSongSection').classList.remove('hidden');
-            document.getElementById('catalogTitle').innerText = 'More Tutorials';
+
+            renderCatalog();
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function showAllSongs() {
+        function showAllSongs(updateUrl = true) {
             currentSong = null;
             document.getElementById('singleSongSection').classList.add('hidden');
             document.getElementById('catalogTitle').innerText = 'Song Catalog';
             document.getElementById('youtubeIframe').src = '';
             
-            try {
-                if (!window.location.href.startsWith('blob:')) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('song');
-                    url.searchParams.delete('v');
-                    window.history.pushState({path: url.href}, '', url.toString());
-                }
-            } catch(e) {}
+            if (updateUrl) {
+                try {
+                    if (!window.location.href.startsWith('blob:')) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('song');
+                        url.searchParams.delete('v');
+                        window.history.pushState({path: url.href}, '', url.toString());
+                    }
+                } catch(e) {}
+            }
 
             renderCatalog();
         }

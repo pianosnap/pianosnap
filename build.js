@@ -20,6 +20,17 @@ fs.writeFileSync(path.join(publicDir, 'admin', 'index.html'), indexHtml);
 fs.writeFileSync(path.join(distDir, 'index.html'), indexHtml);
 fs.writeFileSync(path.join(distDir, 'admin', 'index.html'), indexHtml);
 
+// Copy static assets from public/ to dist/
+if (fs.existsSync(publicDir)) {
+  const publicFiles = fs.readdirSync(publicDir);
+  for (const file of publicFiles) {
+    const filePath = path.join(publicDir, file);
+    if (fs.statSync(filePath).isFile()) {
+      fs.copyFileSync(filePath, path.join(distDir, file));
+    }
+  }
+}
+
 // Copy data if exists
 const dataDir = path.join(rootDir, 'data');
 if (fs.existsSync(dataDir)) {

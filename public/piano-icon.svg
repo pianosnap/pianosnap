@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Outer Rounded Square Background Frame -->
+  <rect x="26" y="26" width="460" height="460" rx="92" fill="#FFFFFF" stroke="#211b22" stroke-width="34" stroke-linejoin="round"/>
+  
+  <!-- 3D Lower Shelf / Shadow on White Keys -->
+  <path d="M43 388 C 43 436, 74 469, 122 469 L 390 469 C 438 469, 469 436, 469 388 L 469 414 C 469 458, 432 470, 390 470 L 122 470 C 80 470, 43 458, 43 414 Z" fill="#b7b8bb"/>
+
+  <!-- 3 Key Dividers (vertical dark lines from black keys to bottom edge) -->
+  <line x1="151" y1="285" x2="151" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+  <line x1="256" y1="285" x2="256" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+  <line x1="361" y1="285" x2="361" y2="470" stroke="#211b22" stroke-width="16" stroke-linecap="square"/>
+
+  <!-- 3 Black Keys with rounded bottoms -->
+  <rect x="115" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+  <rect x="220" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+  <rect x="325" y="40" width="72" height="248" rx="16" fill="#211b22"/>
+</svg>

@@ -14,35 +14,7 @@ app.use(express.json());
 const DATA_DIR = path.join(__dirname, 'data');
 const SONGS_FILE = path.join(DATA_DIR, 'songs.json');
 
-const INITIAL_SONGS = [
-  {
-    id: 'interstellar-main-theme',
-    title: 'Interstellar - Main Theme (First Step)',
-    artist: 'Hans Zimmer / Arr. PianoSnap',
-    youtubeUrl: 'https://www.youtube.com/watch?v=45DGFR0Gv4Y',
-    midiUrl: '',
-    sheetUrl: '',
-    createdAt: 1700000000000
-  },
-  {
-    id: 'golden-hour-piano',
-    title: 'Golden Hour (Fast Piano Tutorial)',
-    artist: 'JVKE / PianoSnap',
-    youtubeUrl: 'https://www.youtube.com/watch?v=PEM0Vs8jf1w',
-    midiUrl: '',
-    sheetUrl: '',
-    createdAt: 1700000100000
-  },
-  {
-    id: 'rush-e-easy-version',
-    title: 'Rush E - Easy & Fast Piano Tutorial',
-    artist: 'Sheet Music Boss / PianoSnap',
-    youtubeUrl: 'https://www.youtube.com/watch?v=Q8P_xT62-P8',
-    midiUrl: '',
-    sheetUrl: '',
-    createdAt: 1700000200000
-  }
-];
+const INITIAL_SONGS = [];
 
 function ensureSongsFile() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -103,6 +75,15 @@ app.post('/api/admin/login', (req, res) => {
 app.get('/api/songs', (req, res) => {
   const songs = getSongs();
   res.json({ success: true, songs });
+});
+
+app.post('/api/songs/import', requireAdminAuth, (req, res) => {
+  const { songs: importedSongs } = req.body || {};
+  if (!Array.isArray(importedSongs)) {
+    return res.status(400).json({ success: false, error: 'Formato non valido: attesa una lista di canzoni.' });
+  }
+  saveSongs(importedSongs);
+  res.json({ success: true, message: 'Catalogo canzoni sovrascritto con successo.', songs: importedSongs });
 });
 
 app.post('/api/songs', requireAdminAuth, (req, res) => {
