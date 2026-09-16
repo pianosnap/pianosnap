@@ -63,7 +63,24 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #ffe500;
         }
+
+        /* Instant Admin Routing Styles */
+        html.is-admin-route #publicSiteView { display: none !important; }
+        html.is-admin-route #adminPageView { display: flex !important; }
     </style>
+    <script>
+        // Instant synchronous early check to prevent flash of home page
+        (function() {
+            try {
+                var p = (window.location.pathname || '').toLowerCase().replace(/\/+$/, '');
+                var h = (window.location.hash || '').toLowerCase();
+                var s = (window.location.search || '').toLowerCase();
+                if (p === '/admin' || p.endsWith('/admin') || p.indexOf('/admin') !== -1 || h === '#admin' || h.indexOf('admin') !== -1 || s.indexOf('admin') !== -1) {
+                    document.documentElement.classList.add('is-admin-route');
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
 <body class="min-h-screen selection:bg-snapYellow selection:text-black">
 
@@ -106,7 +123,7 @@
                 <!-- Search Bar -->
                 <div class="relative w-48 sm:w-72">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
-                    <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search songs or artists..." 
+                    <input type="text" id="searchInput" oninput="handleSearch(this.value)" onkeydown="if(event.key === 'Enter') handleSearchKey(event, this.value)" placeholder="Search songs or artists..." 
                         class="w-full bg-zinc-900/90 text-sm text-white placeholder-zinc-500 rounded-full pl-10 pr-4 py-2 border border-zinc-800 focus:outline-none focus:border-snapYellow transition">
                 </div>
             </div>
@@ -940,6 +957,9 @@
         let hasUnsavedChanges = false;
         let lastLocalSaveTime = 0;
 
+        // Immediate initial route check
+        checkRoute();
+
         // Startup
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
@@ -953,7 +973,21 @@
             checkRoute();
         });
 
+        window.addEventListener('hashchange', () => {
+            checkRoute();
+        });
+
+        // Secret Admin Hotkey: Ctrl+Shift+A or Cmd+Shift+A
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+                e.preventDefault();
+                navigateToAdmin();
+            }
+        });
+
         async function initApp() {
+            // Check route first to ensure admin view is shown immediately if on /admin
+            checkRoute();
             checkCookieConsent();
             // 1. Load songs from localStorage
             try {
@@ -1082,8 +1116,10 @@
                     search.includes('admin');
 
                 if (isAdminRoute) {
+                    document.documentElement.classList.add('is-admin-route');
                     showAdminView();
                 } else {
+                    document.documentElement.classList.remove('is-admin-route');
                     showPublicView();
                     // Check if direct song requested via parameter
                     const songId = params.get('song');
@@ -1110,6 +1146,7 @@
         }
 
         function showAdminView() {
+            document.documentElement.classList.add('is-admin-route');
             const publicEl = document.getElementById('publicSiteView');
             const adminEl = document.getElementById('adminPageView');
             if (publicEl) publicEl.classList.add('hidden');
@@ -1124,6 +1161,7 @@
         }
 
         function showPublicView() {
+            document.documentElement.classList.remove('is-admin-route');
             const publicEl = document.getElementById('publicSiteView');
             const adminEl = document.getElementById('adminPageView');
             if (adminEl) adminEl.classList.add('hidden');
@@ -1132,6 +1170,7 @@
         }
 
         function navigateToAdmin() {
+            document.documentElement.classList.add('is-admin-route');
             try {
                 if (window.location.protocol === 'blob:' || window.location.protocol === 'file:') {
                     window.location.hash = 'admin';
@@ -1145,8 +1184,9 @@
         }
 
         function navigateToHome() {
+            document.documentElement.classList.remove('is-admin-route');
             try {
-                if (window.location.hash === '#admin') {
+                if (window.location.hash.includes('admin')) {
                     window.location.hash = '';
                 }
                 if (!window.location.href.startsWith('blob:')) {
@@ -1156,7 +1196,24 @@
             showPublicView();
         }
 
+        let logoClicks = 0;
+        let logoTimer = null;
         function handleHomeLogoClick(e) {
+            // Secret admin trigger: Shift+Click or 3 rapid clicks on the logo
+            if (e && e.shiftKey) {
+                if (e.preventDefault) e.preventDefault();
+                navigateToAdmin();
+                return;
+            }
+            logoClicks++;
+            clearTimeout(logoTimer);
+            logoTimer = setTimeout(() => { logoClicks = 0; }, 1200);
+            if (logoClicks >= 3) {
+                logoClicks = 0;
+                if (e && e.preventDefault) e.preventDefault();
+                navigateToAdmin();
+                return;
+            }
             if (e && e.preventDefault) e.preventDefault();
             navigateToHome();
             showAllSongs();
@@ -2055,9 +2112,26 @@
         }
 
         function handleSearch(query) {
-            currentSearchQuery = query.toLowerCase().trim();
+            const clean = (query || '').toLowerCase().trim();
+            if (clean === '/admin' || clean === '/admin/' || clean === 'admin' || clean === '#admin') {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = '';
+                navigateToAdmin();
+                return;
+            }
+            currentSearchQuery = clean;
             currentPage = 1;
             renderCatalog();
+        }
+
+        function handleSearchKey(e, query) {
+            const clean = (query || '').toLowerCase().trim();
+            if (clean === '/admin' || clean === '/admin/' || clean === 'admin' || clean === '#admin') {
+                if (e && e.preventDefault) e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = '';
+                navigateToAdmin();
+            }
         }
 
         function renderCatalog() {
@@ -2498,6 +2572,7 @@
             triggerDownloadModal,
             handleAdminSearch,
             handleSearch,
+            handleSearchKey,
             updateThumbnailPreview,
             handleAdminLoginForm,
             handleSaveSong,

@@ -158,19 +158,19 @@ app.delete('/api/songs/:id', requireAdminAuth, (req, res) => {
   res.json({ success: true, message: 'Canzone eliminata con successo.', songs });
 });
 
-// Explicit admin route: serve index.html directly without redirect
-app.get(['/admin', '/admin/*'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+const staticDir = fs.existsSync(path.join(__dirname, 'dist', 'index.html'))
+  ? path.join(__dirname, 'dist')
+  : (fs.existsSync(path.join(__dirname, 'public', 'index.html')) ? path.join(__dirname, 'public') : __dirname);
+
+// Explicit admin route: serve index.html directly with 200 without redirect
+app.get(['/admin', '/admin/'], (req, res) => {
+  res.sendFile(path.join(staticDir, 'index.html'));
 });
 
 // Static assets
 if (fs.existsSync(path.join(__dirname, 'public'))) {
   app.use(express.static(path.join(__dirname, 'public')));
 }
-
-const staticDir = fs.existsSync(path.join(__dirname, 'dist', 'index.html'))
-  ? path.join(__dirname, 'dist')
-  : __dirname;
 
 app.use(express.static(staticDir));
 
