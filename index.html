@@ -940,6 +940,7 @@
         const ADMIN_SONGS_PER_PAGE = 30;
         let isSavingInProgress = false;
         let hasUnsavedChanges = false;
+        let lastLocalSaveTime = 0;
 
         // Startup
         if (document.readyState === 'loading') {
@@ -956,21 +957,36 @@
 
         async function initApp() {
             checkCookieConsent();
-            // Purge any legacy dummy songs from localStorage
+            // 1. Load songs from localStorage
             try {
                 const stored = localStorage.getItem('pianosnap_songs');
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed)) {
+                    if (Array.isArray(parsed) && parsed.length > 0) {
                         songs = parsed.filter(s => !DUMMY_IDS.has(s.id));
-                        localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
                     }
                 }
             } catch (e) {
                 songs = [];
             }
 
-            // Show initial loading state in catalog while waiting for Firestore
+            // 2. If localStorage is empty, try loading from server-side database (/api/songs)
+            if (songs.length === 0) {
+                try {
+                    const res = await fetch('/api/songs');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && Array.isArray(data.songs) && data.songs.length > 0) {
+                            songs = data.songs.filter(s => !DUMMY_IDS.has(s.id));
+                            localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Server API songs load warning:', e);
+                }
+            }
+
+            // Show initial state in catalog while waiting for Firestore
             renderCatalog();
             checkRoute();
             initFirestoreListener();
@@ -1160,16 +1176,22 @@
                         return;
                     }
 
+                    const isRecentlySaved = (Date.now() - lastLocalSaveTime) < 15000;
+
                     if (snapshot.empty) {
-                        if (songs.length === 0 || (!adminToken && !hasUnsavedChanges)) {
+                        // CRITICAL: NEVER wipe out songs if we already have songs loaded locally!
+                        if (songs.length === 0) {
                             songs = [];
                             localStorage.setItem('pianosnap_songs', JSON.stringify([]));
                             renderCatalog();
                             if (adminToken) renderAdminDashboardData();
+                        } else if (!isRecentlySaved && adminToken) {
+                            // If local songs exist but Firestore is empty, sync local songs to Firestore
+                            saveAllSongsToServerAndCloud(songs, false).catch(() => {});
                         }
                         const dbStatus = document.getElementById('databaseStatusText');
                         if (dbStatus) {
-                            dbStatus.innerText = 'Database Cloud Firebase Attivo (0 canzoni - pronto)';
+                            dbStatus.innerText = `Database Cloud Firebase Attivo (${songs.length} canzoni)`;
                         }
                         return;
                     }
@@ -1195,6 +1217,12 @@
 
                     // Sort newest first
                     firestoreSongs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                    // If we recently saved or imported locally, and Firestore returned fewer songs (intermediate state),
+                    // DO NOT downgrade or wipe local songs!
+                    if (isRecentlySaved && firestoreSongs.length < songs.length) {
+                        return;
+                    }
 
                     // Avoid overwriting uncommitted admin changes
                     if (adminToken && hasUnsavedChanges) {
@@ -1273,6 +1301,7 @@
         async function saveAllSongsToServerAndCloud(songsToSave, notify = true) {
             if (!Array.isArray(songsToSave)) return false;
             isSavingInProgress = true;
+            lastLocalSaveTime = Date.now();
 
             const saveBtns = [
                 document.getElementById('adminHeaderSaveBtn'),
@@ -1284,9 +1313,40 @@
                 btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvataggio...</span>`;
             });
 
+            // 1. Sanitize all songs and IDs for Firestore & storage
+            const cleanSongs = songsToSave.map((item, idx) => {
+                const title = String(item.title || item.name || 'Untitled Song').trim();
+                const artist = String(item.artist || item.author || 'PianoSnap').trim();
+                const rawId = item.id || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
+                let cleanId = String(rawId || `song-${idx}-${Date.now().toString(36)}`)
+                    .trim()
+                    .replace(/[\/\s\.\#\$\[\]]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                if (!cleanId) {
+                    cleanId = `song-${idx}-${Date.now().toString(36)}`;
+                }
+                const yt = String(item.youtubeUrl || item.youtube || item.url || item.video || 'https://www.youtube.com/watch?v=45DGFR0Gv4Y').trim();
+                const midi = String(item.midiUrl || item.midi || item.mid || '').trim();
+                const sheet = String(item.sheetUrl || item.sheet || item.pdf || '').trim();
+                const createdAt = Number(item.createdAt) || (Date.now() - idx * 1000);
+
+                return {
+                    id: cleanId,
+                    title,
+                    artist,
+                    youtubeUrl: yt,
+                    midiUrl: midi,
+                    sheetUrl: sheet,
+                    createdAt
+                };
+            });
+
+            // In-memory update
+            songs = cleanSongs;
+
             try {
                 // 1. Keep local storage immediately in sync
-                localStorage.setItem('pianosnap_songs', JSON.stringify(songsToSave));
+                localStorage.setItem('pianosnap_songs', JSON.stringify(cleanSongs));
                 localStorage.setItem('pianosnap_songs_modified_at', Date.now().toString());
 
                 // 2. Server API sync (/api/songs/save-all)
@@ -1298,7 +1358,7 @@
                             'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
                         },
                         body: JSON.stringify({ 
-                            songs: songsToSave,
+                            songs: cleanSongs,
                             adminToken: adminToken || 'ps_admin_session_auth_matrix_2026'
                         })
                     });
@@ -1309,49 +1369,67 @@
                 // 3. Firestore Cloud sync
                 try {
                     const songsCol = collection(db, 'songs');
-                    const existingSnap = await getDocs(songsCol);
-                    
-                    const targetIds = new Set(songsToSave.map(s => s.id));
-                    const deletePromises = [];
-                    existingSnap.forEach(docSnap => {
-                        if (!targetIds.has(docSnap.id)) {
-                            deletePromises.push(deleteDoc(doc(db, 'songs', docSnap.id)).catch(() => {}));
-                        }
-                    });
-                    if (deletePromises.length > 0) {
-                        await Promise.all(deletePromises);
-                    }
 
-                    // Batch commit songs in chunks of 400
-                    const batchSize = 400;
-                    for (let i = 0; i < songsToSave.length; i += batchSize) {
-                        const batch = writeBatch(db);
-                        const chunk = songsToSave.slice(i, i + batchSize);
-                        for (const song of chunk) {
-                            const docRef = doc(db, 'songs', song.id);
-                            batch.set(docRef, {
-                                id: song.id,
-                                title: song.title,
-                                artist: song.artist,
-                                youtubeUrl: song.youtubeUrl,
-                                midiUrl: song.midiUrl || '',
-                                sheetUrl: song.sheetUrl || '',
-                                createdAt: song.createdAt || Date.now()
-                            });
+                    if (cleanSongs.length === 0) {
+                        // Svuota Firestore
+                        const existingSnap = await getDocs(songsCol);
+                        const deletePromises = [];
+                        existingSnap.forEach(docSnap => {
+                            deletePromises.push(deleteDoc(doc(db, 'songs', docSnap.id)).catch(() => {}));
+                        });
+                        if (deletePromises.length > 0) {
+                            await Promise.all(deletePromises);
                         }
-                        await batch.commit();
+                    } else {
+                        // A. Scrivi prima tutte le canzoni in batch (così Firestore non è mai vuoto)
+                        const batchSize = 400;
+                        for (let i = 0; i < cleanSongs.length; i += batchSize) {
+                            const batch = writeBatch(db);
+                            const chunk = cleanSongs.slice(i, i + batchSize);
+                            for (const song of chunk) {
+                                const docRef = doc(db, 'songs', song.id);
+                                batch.set(docRef, {
+                                    id: song.id,
+                                    title: song.title,
+                                    artist: song.artist,
+                                    youtubeUrl: song.youtubeUrl,
+                                    midiUrl: song.midiUrl || '',
+                                    sheetUrl: song.sheetUrl || '',
+                                    createdAt: song.createdAt || Date.now()
+                                });
+                            }
+                            await batch.commit();
+                        }
+
+                        // B. Rimuovi eventuali documenti obsoleti non più presenti nel nuovo catalogo
+                        try {
+                            const existingSnap = await getDocs(songsCol);
+                            const targetIds = new Set(cleanSongs.map(s => s.id));
+                            const deletePromises = [];
+                            existingSnap.forEach(docSnap => {
+                                if (!targetIds.has(docSnap.id)) {
+                                    deletePromises.push(deleteDoc(doc(db, 'songs', docSnap.id)).catch(() => {}));
+                                }
+                            });
+                            if (deletePromises.length > 0) {
+                                await Promise.all(deletePromises);
+                            }
+                        } catch (cleanupErr) {
+                            console.warn('Firestore cleanup notice:', cleanupErr);
+                        }
                     }
                 } catch (fsErr) {
                     console.warn('Firestore sync notice:', fsErr);
                 }
 
                 // Complete!
+                lastLocalSaveTime = Date.now();
                 markUnsavedChanges(false);
                 renderAdminDashboardData();
                 renderCatalog();
 
                 if (notify) {
-                    showToast(`Tutte le modifiche sono state salvate! (${songsToSave.length} canzoni)`, 'fa-circle-check');
+                    showToast(`Tutte le modifiche sono state salvate! (${cleanSongs.length} canzoni)`, 'fa-circle-check');
                 }
                 return true;
             } catch (err) {
@@ -1361,7 +1439,10 @@
                 }
                 return false;
             } finally {
-                isSavingInProgress = false;
+                setTimeout(() => {
+                    isSavingInProgress = false;
+                }, 2000);
+
                 saveBtns.forEach(btn => {
                     if (!btn) return;
                     btn.disabled = false;
@@ -1419,14 +1500,20 @@
                         const title = String(item.title || item.name || 'Untitled Song').trim();
                         const artist = String(item.artist || item.author || 'PianoSnap').trim();
                         const rawId = item.id || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
-                        const finalId = (rawId || `song-${idx}-${Date.now().toString().slice(-4)}`).trim();
+                        let cleanId = String(rawId || `song-${idx}-${Date.now().toString(36)}`)
+                            .trim()
+                            .replace(/[\/\s\.\#\$\[\]]+/g, '-')
+                            .replace(/^-+|-+$/g, '');
+                        if (!cleanId) {
+                            cleanId = `song-${idx}-${Date.now().toString(36)}`;
+                        }
                         const yt = String(item.youtubeUrl || item.youtube || item.url || item.video || 'https://www.youtube.com/watch?v=45DGFR0Gv4Y').trim();
                         const midi = String(item.midiUrl || item.midi || item.mid || '').trim();
                         const sheet = String(item.sheetUrl || item.sheet || item.pdf || '').trim();
                         const createdAt = Number(item.createdAt) || (Date.now() - idx * 1000);
 
                         return {
-                            id: finalId,
+                            id: cleanId,
                             title,
                             artist,
                             youtubeUrl: yt,
@@ -1438,6 +1525,12 @@
 
                     // 1. TOTAL OVERWRITE: replace the entire catalog with the songs in the imported JSON
                     songs = [...cleanImported];
+                    lastLocalSaveTime = Date.now();
+                    isSavingInProgress = true;
+
+                    // Immediately save to local storage
+                    localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
+                    localStorage.setItem('pianosnap_songs_modified_at', Date.now().toString());
 
                     // 2. Render immediately in Admin and Public
                     renderAdminDashboardData();
