@@ -104,12 +104,10 @@
                 </a>
 
                 <!-- Search Bar -->
-                <div class="flex items-center gap-3">
-                    <div class="relative w-48 sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
-                        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search songs or artists..." 
-                            class="w-full bg-zinc-900/90 text-sm text-white placeholder-zinc-500 rounded-full pl-10 pr-4 py-2 border border-zinc-800 focus:outline-none focus:border-snapYellow transition">
-                    </div>
+                <div class="relative w-48 sm:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-sm"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search songs or artists..." 
+                        class="w-full bg-zinc-900/90 text-sm text-white placeholder-zinc-500 rounded-full pl-10 pr-4 py-2 border border-zinc-800 focus:outline-none focus:border-snapYellow transition">
                 </div>
             </div>
         </header>
@@ -1066,40 +1064,56 @@
         // ROUTING (PUBLIC VS HIDDEN ADMIN)
         // ==========================================
         function checkRoute() {
-            const path = window.location.pathname;
-            const hash = window.location.hash;
-            const params = new URLSearchParams(window.location.search);
+            try {
+                const path = (window.location.pathname || '').toLowerCase();
+                const hash = (window.location.hash || '').toLowerCase();
+                const search = (window.location.search || '').toLowerCase();
+                const params = new URLSearchParams(window.location.search);
 
-            const isAdminRoute = path === '/admin' || path.endsWith('/admin') || hash === '#admin' || params.has('admin');
+                const cleanPath = path.replace(/\/+$/, '');
+                const isAdminRoute = 
+                    cleanPath === '/admin' || 
+                    cleanPath.endsWith('/admin') || 
+                    cleanPath.includes('/admin') ||
+                    path === '/admin/' ||
+                    hash === '#admin' || 
+                    hash.startsWith('#admin') || 
+                    params.has('admin') ||
+                    search.includes('admin');
 
-            if (isAdminRoute) {
-                showAdminView();
-            } else {
-                showPublicView();
-                // Check if direct song requested via parameter
-                const songId = params.get('song');
-                const videoId = params.get('v');
-                if (songId) {
-                    const found = songs.find(s => s.id === songId);
-                    if (found) {
-                        selectSong(found.id, false);
-                        return;
+                if (isAdminRoute) {
+                    showAdminView();
+                } else {
+                    showPublicView();
+                    // Check if direct song requested via parameter
+                    const songId = params.get('song');
+                    const videoId = params.get('v');
+                    if (songId && Array.isArray(songs)) {
+                        const found = songs.find(s => s.id === songId);
+                        if (found) {
+                            selectSong(found.id, false);
+                            return;
+                        }
                     }
-                }
-                if (videoId) {
-                    const foundByVideo = songs.find(s => getYoutubeId(s.youtubeUrl) === videoId);
-                    if (foundByVideo) {
-                        selectSong(foundByVideo.id, false);
-                        return;
+                    if (videoId && Array.isArray(songs)) {
+                        const foundByVideo = songs.find(s => getYoutubeId(s.youtubeUrl) === videoId);
+                        if (foundByVideo) {
+                            selectSong(foundByVideo.id, false);
+                            return;
+                        }
                     }
+                    showAllSongs(false);
                 }
-                showAllSongs(false);
+            } catch (err) {
+                console.error('checkRoute error:', err);
             }
         }
 
         function showAdminView() {
-            document.getElementById('publicSiteView').classList.add('hidden');
-            document.getElementById('adminPageView').classList.remove('hidden');
+            const publicEl = document.getElementById('publicSiteView');
+            const adminEl = document.getElementById('adminPageView');
+            if (publicEl) publicEl.classList.add('hidden');
+            if (adminEl) adminEl.classList.remove('hidden');
 
             if (adminToken) {
                 showAdminDashboard();
@@ -1110,22 +1124,31 @@
         }
 
         function showPublicView() {
-            document.getElementById('adminPageView').classList.add('hidden');
-            document.getElementById('publicSiteView').classList.remove('hidden');
+            const publicEl = document.getElementById('publicSiteView');
+            const adminEl = document.getElementById('adminPageView');
+            if (adminEl) adminEl.classList.add('hidden');
+            if (publicEl) publicEl.classList.remove('hidden');
             renderCatalog();
         }
 
         function navigateToAdmin() {
             try {
-                if (!window.location.href.startsWith('blob:')) {
+                if (window.location.protocol === 'blob:' || window.location.protocol === 'file:') {
+                    window.location.hash = 'admin';
+                } else {
                     window.history.pushState({}, '', '/admin');
                 }
-            } catch(e) {}
+            } catch(e) {
+                try { window.location.hash = 'admin'; } catch(e2) {}
+            }
             showAdminView();
         }
 
         function navigateToHome() {
             try {
+                if (window.location.hash === '#admin') {
+                    window.location.hash = '';
+                }
                 if (!window.location.href.startsWith('blob:')) {
                     window.history.pushState({}, '', '/');
                 }
@@ -1134,10 +1157,13 @@
         }
 
         function handleHomeLogoClick(e) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
             navigateToHome();
             showAllSongs();
         }
+
+        window.addEventListener('popstate', checkRoute);
+        window.addEventListener('hashchange', checkRoute);
 
         // ==========================================
         // DATA SYNC WITH CLOUD FIRESTORE & LOCAL STORAGE
@@ -1653,19 +1679,23 @@
         // ADMIN SONG MANAGEMENT (ADD, EDIT, DELETE)
         // ==========================================
         function renderAdminDashboardData() {
-            const statTotal = document.getElementById('statTotalSongs');
-            const statMidi = document.getElementById('statMidiSongs');
-            const statSheet = document.getElementById('statSheetSongs');
+            try {
+                const statTotal = document.getElementById('statTotalSongs');
+                const statMidi = document.getElementById('statMidiSongs');
+                const statSheet = document.getElementById('statSheetSongs');
 
-            const total = songs.length;
-            const midiCount = songs.filter(s => s.midiUrl && s.midiUrl.trim() !== '').length;
-            const sheetCount = songs.filter(s => s.sheetUrl && s.sheetUrl.trim() !== '').length;
+                const total = Array.isArray(songs) ? songs.length : 0;
+                const midiCount = Array.isArray(songs) ? songs.filter(s => s && s.midiUrl && String(s.midiUrl).trim() !== '').length : 0;
+                const sheetCount = Array.isArray(songs) ? songs.filter(s => s && s.sheetUrl && String(s.sheetUrl).trim() !== '').length : 0;
 
-            statTotal.innerText = total;
-            statMidi.innerText = midiCount;
-            statSheet.innerText = sheetCount;
+                if (statTotal) statTotal.innerText = total;
+                if (statMidi) statMidi.innerText = midiCount;
+                if (statSheet) statSheet.innerText = sheetCount;
 
-            renderAdminSongList();
+                renderAdminSongList();
+            } catch (err) {
+                console.error('Error rendering admin dashboard data:', err);
+            }
         }
 
         function updateThumbnailPreview(url) {
@@ -2455,6 +2485,9 @@
             handleHomeLogoClick,
             handleSubscribeClick,
             navigateToHome,
+            navigateToAdmin,
+            showAdminView,
+            showAdminDashboard,
             openDeleteModal,
             previewSongInHome,
             resetSongForm,

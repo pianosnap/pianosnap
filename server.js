@@ -158,6 +158,11 @@ app.delete('/api/songs/:id', requireAdminAuth, (req, res) => {
   res.json({ success: true, message: 'Canzone eliminata con successo.', songs });
 });
 
+// Explicit admin route: serve index.html directly without redirect
+app.get(['/admin', '/admin/*'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Static assets
 if (fs.existsSync(path.join(__dirname, 'public'))) {
   app.use(express.static(path.join(__dirname, 'public')));
