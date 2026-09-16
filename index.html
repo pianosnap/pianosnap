@@ -310,6 +310,10 @@
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <button id="adminHeaderSaveBtn" onclick="handleManualSaveAdminChanges()" title="Salva tutte le modifiche del catalogo nel Cloud e sul Server" class="text-xs font-black text-black bg-snapYellow hover:bg-yellow-400 px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Salva Modifiche</span>
+                    </button>
                     <button onclick="navigateToHome()" class="text-xs font-bold text-zinc-300 hover:text-snapYellow bg-zinc-900 hover:bg-zinc-800 px-4 py-2 rounded-xl border border-zinc-800 transition flex items-center gap-2">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>Torna alla Home</span>
@@ -422,30 +426,36 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <span id="databaseStatusText" class="text-xs font-bold text-white block">Database Cloud Firebase Attivo (100% Gratuito)</span>
-                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">Live Sync</span>
+                                <span id="saveStatusIndicator" class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">Tutto Sincronizzato</span>
                             </div>
-                            <p class="text-[11px] text-zinc-400">Tutti i visitatori vedono in tempo reale le canzoni aggiunte o modificate dall'admin.</p>
+                            <p class="text-[11px] text-zinc-400">Le canzoni aggiunte dal form o importate da JSON sono salvate e visibili a tutti i visitatori.</p>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
+                        <button id="adminSyncBarSaveBtn" onclick="handleManualSaveAdminChanges()" title="Salva tutte le modifiche attuali nel Cloud e sul Server" 
+                            class="px-4 py-2 bg-snapYellow hover:bg-yellow-400 text-black rounded-xl text-xs font-black transition flex items-center gap-2 shadow-md hover:shadow-lg">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Salva Modifiche</span>
+                        </button>
+
                         <button onclick="exportSongsJson()" title="Scarica il file songs.json aggiornato" 
                             class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-zinc-700/50">
                             <i class="fa-solid fa-download text-snapYellow"></i>
                             <span>Scarica songs.json</span>
                         </button>
 
-                        <label for="importSongsFileInput" title="Carica catalogo da file JSON" 
+                        <label for="importSongsFileInput" title="Carica catalogo da file JSON (sovrascrive catalogo con i brani del file)" 
                             class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-zinc-700/50 cursor-pointer">
                             <i class="fa-solid fa-upload text-blue-400"></i>
                             <span>Importa JSON</span>
                             <input type="file" id="importSongsFileInput" accept=".json" class="hidden" onchange="handleImportSongsJson(event)">
                         </label>
 
-                        <button onclick="resetToDefaultSongs()" title="Ripristina le canzoni originali predefinite" 
+                        <button onclick="resetToDefaultSongs()" title="Svuota completamente il catalogo" 
                             class="px-3 py-2 bg-zinc-900 hover:bg-red-950/60 text-zinc-400 hover:text-red-300 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-zinc-800 hover:border-red-800/40">
-                            <i class="fa-solid fa-rotate-left"></i>
-                            <span>Ripristina Default</span>
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>Svuota Catalogo</span>
                         </button>
                     </div>
                 </div>
@@ -872,7 +882,8 @@
             setDoc, 
             deleteDoc, 
             getDocs,
-            onSnapshot 
+            onSnapshot,
+            writeBatch 
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         // Firebase Configuration (Google Cloud / Firebase Free Tier)
@@ -927,6 +938,8 @@
         let adminFilterQuery = '';
         let adminCurrentPage = 1;
         const ADMIN_SONGS_PER_PAGE = 30;
+        let isSavingInProgress = false;
+        let hasUnsavedChanges = false;
 
         // Startup
         if (document.readyState === 'loading') {
@@ -1143,14 +1156,20 @@
                     clearTimeout(offlineFallbackTimer);
                     isInitialLoading = false;
 
+                    if (isSavingInProgress) {
+                        return;
+                    }
+
                     if (snapshot.empty) {
-                        songs = [];
-                        localStorage.setItem('pianosnap_songs', JSON.stringify([]));
-                        renderCatalog();
-                        if (adminToken) renderAdminDashboardData();
+                        if (songs.length === 0 || (!adminToken && !hasUnsavedChanges)) {
+                            songs = [];
+                            localStorage.setItem('pianosnap_songs', JSON.stringify([]));
+                            renderCatalog();
+                            if (adminToken) renderAdminDashboardData();
+                        }
                         const dbStatus = document.getElementById('databaseStatusText');
                         if (dbStatus) {
-                            dbStatus.innerText = 'Database Cloud Firebase Attivo (0 canzoni - pronto per nuovi tutorial)';
+                            dbStatus.innerText = 'Database Cloud Firebase Attivo (0 canzoni - pronto)';
                         }
                         return;
                     }
@@ -1176,6 +1195,11 @@
 
                     // Sort newest first
                     firestoreSongs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                    // Avoid overwriting uncommitted admin changes
+                    if (adminToken && hasUnsavedChanges) {
+                        return;
+                    }
 
                     songs = firestoreSongs;
                     localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
@@ -1216,6 +1240,140 @@
             }
         }
 
+        function markUnsavedChanges(hasChanges = true) {
+            hasUnsavedChanges = hasChanges;
+            const saveBtns = [
+                document.getElementById('adminHeaderSaveBtn'), 
+                document.getElementById('adminSyncBarSaveBtn')
+            ];
+            const statusText = document.getElementById('saveStatusIndicator');
+            
+            saveBtns.forEach(btn => {
+                if (!btn) return;
+                if (hasChanges) {
+                    btn.className = "text-xs font-black text-black bg-amber-400 hover:bg-amber-300 px-4 py-2 rounded-xl shadow-lg ring-2 ring-amber-400/50 transition flex items-center gap-2 animate-pulse cursor-pointer";
+                    btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>Salva Modifiche</span> <span class="w-2 h-2 rounded-full bg-red-600 inline-block"></span>`;
+                } else {
+                    btn.className = "text-xs font-black text-black bg-snapYellow hover:bg-yellow-400 px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer";
+                    btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>Salva Modifiche</span>`;
+                }
+            });
+
+            if (statusText) {
+                if (hasChanges) {
+                    statusText.className = "px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[10px] font-bold border border-amber-500/30 flex items-center gap-1.5";
+                    statusText.innerHTML = `<i class="fa-solid fa-circle-dot animate-ping text-[8px] text-amber-400"></i> Modifiche non salvate`;
+                } else {
+                    statusText.className = "px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/30";
+                    statusText.innerText = "Tutto Sincronizzato";
+                }
+            }
+        }
+
+        async function saveAllSongsToServerAndCloud(songsToSave, notify = true) {
+            if (!Array.isArray(songsToSave)) return false;
+            isSavingInProgress = true;
+
+            const saveBtns = [
+                document.getElementById('adminHeaderSaveBtn'),
+                document.getElementById('adminSyncBarSaveBtn')
+            ];
+            saveBtns.forEach(btn => {
+                if (!btn) return;
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Salvataggio...</span>`;
+            });
+
+            try {
+                // 1. Keep local storage immediately in sync
+                localStorage.setItem('pianosnap_songs', JSON.stringify(songsToSave));
+                localStorage.setItem('pianosnap_songs_modified_at', Date.now().toString());
+
+                // 2. Server API sync (/api/songs/save-all)
+                try {
+                    await fetch('/api/songs/save-all', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
+                        },
+                        body: JSON.stringify({ 
+                            songs: songsToSave,
+                            adminToken: adminToken || 'ps_admin_session_auth_matrix_2026'
+                        })
+                    });
+                } catch (serverErr) {
+                    console.warn('Server save-all warning:', serverErr);
+                }
+
+                // 3. Firestore Cloud sync
+                try {
+                    const songsCol = collection(db, 'songs');
+                    const existingSnap = await getDocs(songsCol);
+                    
+                    const targetIds = new Set(songsToSave.map(s => s.id));
+                    const deletePromises = [];
+                    existingSnap.forEach(docSnap => {
+                        if (!targetIds.has(docSnap.id)) {
+                            deletePromises.push(deleteDoc(doc(db, 'songs', docSnap.id)).catch(() => {}));
+                        }
+                    });
+                    if (deletePromises.length > 0) {
+                        await Promise.all(deletePromises);
+                    }
+
+                    // Batch commit songs in chunks of 400
+                    const batchSize = 400;
+                    for (let i = 0; i < songsToSave.length; i += batchSize) {
+                        const batch = writeBatch(db);
+                        const chunk = songsToSave.slice(i, i + batchSize);
+                        for (const song of chunk) {
+                            const docRef = doc(db, 'songs', song.id);
+                            batch.set(docRef, {
+                                id: song.id,
+                                title: song.title,
+                                artist: song.artist,
+                                youtubeUrl: song.youtubeUrl,
+                                midiUrl: song.midiUrl || '',
+                                sheetUrl: song.sheetUrl || '',
+                                createdAt: song.createdAt || Date.now()
+                            });
+                        }
+                        await batch.commit();
+                    }
+                } catch (fsErr) {
+                    console.warn('Firestore sync notice:', fsErr);
+                }
+
+                // Complete!
+                markUnsavedChanges(false);
+                renderAdminDashboardData();
+                renderCatalog();
+
+                if (notify) {
+                    showToast(`Tutte le modifiche sono state salvate! (${songsToSave.length} canzoni)`, 'fa-circle-check');
+                }
+                return true;
+            } catch (err) {
+                console.error('Error in saveAllSongsToServerAndCloud:', err);
+                if (notify) {
+                    showToast('Errore durante il salvataggio delle modifiche.', 'fa-circle-exclamation');
+                }
+                return false;
+            } finally {
+                isSavingInProgress = false;
+                saveBtns.forEach(btn => {
+                    if (!btn) return;
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>Salva Modifiche</span>`;
+                });
+            }
+        }
+
+        function handleManualSaveAdminChanges() {
+            saveAllSongsToServerAndCloud(songs, true);
+        }
+
         function saveLocalSongs(markModified = true) {
             try {
                 localStorage.setItem('pianosnap_songs', JSON.stringify(songs));
@@ -1248,72 +1406,51 @@
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
-                    const imported = JSON.parse(e.target.result);
-                    if (!Array.isArray(imported) || imported.length === 0) {
-                        showToast('Il file JSON non contiene una lista valida di canzoni.', 'fa-triangle-exclamation');
+                    const rawContent = e.target.result;
+                    const imported = JSON.parse(rawContent);
+                    if (!Array.isArray(imported)) {
+                        showToast('Il file JSON non contiene una lista valida (array) di canzoni.', 'fa-triangle-exclamation');
                         event.target.value = '';
                         return;
                     }
 
-                    showToast('Sovrascrittura catalogo in corso...', 'fa-spinner fa-spin');
-
-                    // Standardize every song object
+                    // Standardize and sanitize every song object from JSON
                     const cleanImported = imported.map((item, idx) => {
-                        const rawId = item.id || (item.title ? item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
+                        const title = String(item.title || item.name || 'Untitled Song').trim();
+                        const artist = String(item.artist || item.author || 'PianoSnap').trim();
+                        const rawId = item.id || (title ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
                         const finalId = (rawId || `song-${idx}-${Date.now().toString().slice(-4)}`).trim();
+                        const yt = String(item.youtubeUrl || item.youtube || item.url || item.video || 'https://www.youtube.com/watch?v=45DGFR0Gv4Y').trim();
+                        const midi = String(item.midiUrl || item.midi || item.mid || '').trim();
+                        const sheet = String(item.sheetUrl || item.sheet || item.pdf || '').trim();
+                        const createdAt = Number(item.createdAt) || (Date.now() - idx * 1000);
+
                         return {
                             id: finalId,
-                            title: String(item.title || 'Untitled Song').trim(),
-                            artist: String(item.artist || 'PianoSnap').trim(),
-                            youtubeUrl: String(item.youtubeUrl || item.youtube || 'https://www.youtube.com/watch?v=45DGFR0Gv4Y').trim(),
-                            midiUrl: String(item.midiUrl || item.midi || '').trim(),
-                            sheetUrl: String(item.sheetUrl || item.sheet || '').trim(),
-                            createdAt: Number(item.createdAt) || (Date.now() - idx * 1000)
+                            title,
+                            artist,
+                            youtubeUrl: yt,
+                            midiUrl: midi,
+                            sheetUrl: sheet,
+                            createdAt
                         };
                     });
 
-                    // 1. Full overwrite on Firestore: delete all current songs and insert imported songs
-                    try {
-                        const songsCol = collection(db, 'songs');
-                        const existingSnap = await getDocs(songsCol);
-                        const deletePromises = [];
-                        existingSnap.forEach(docSnap => {
-                            deletePromises.push(deleteDoc(doc(db, 'songs', docSnap.id)));
-                        });
-                        await Promise.all(deletePromises);
+                    // 1. TOTAL OVERWRITE: replace the entire catalog with the songs in the imported JSON
+                    songs = [...cleanImported];
 
-                        const writePromises = [];
-                        for (const song of cleanImported) {
-                            writePromises.push(setDoc(doc(db, 'songs', song.id), song));
-                        }
-                        await Promise.all(writePromises);
-                    } catch (fsErr) {
-                        console.warn('Firestore overwrite notice:', fsErr);
-                    }
-
-                    // 2. Full overwrite on server API songs.json
-                    try {
-                        await fetch('/api/songs/import', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                            },
-                            body: JSON.stringify({ songs: cleanImported })
-                        });
-                    } catch (srvErr) {
-                        console.warn('Server import sync notice:', srvErr);
-                    }
-
-                    // 3. Update local songs and storage
-                    songs = cleanImported;
-                    saveLocalSongs(true);
+                    // 2. Render immediately in Admin and Public
                     renderAdminDashboardData();
                     renderCatalog();
-                    showToast(`Catalogo sovrascritto con successo! (${songs.length} canzoni)`, 'fa-check-double');
+
+                    showToast(`JSON caricato: ${songs.length} canzoni importate. Salvataggio in corso...`, 'fa-cloud-arrow-up');
+
+                    // 3. Save full list to Server & Firestore
+                    await saveAllSongsToServerAndCloud(songs, true);
+
                 } catch (err) {
                     console.error('JSON import error:', err);
-                    showToast('Errore durante la lettura o importazione del file JSON.', 'fa-circle-xmark');
+                    showToast('Errore durante la lettura del file JSON. Verifica la formattazione.', 'fa-circle-xmark');
                 }
                 event.target.value = '';
             };
@@ -1321,13 +1458,12 @@
         }
 
         function resetToDefaultSongs() {
-            if (confirm('Sei sicuro di voler ripristinare il catalogo alle canzoni predefinite di fabbrica? Tutte le modifiche locali verranno eliminate.')) {
-                songs = [...DEFAULT_SONGS];
+            if (confirm('Sei sicuro di voler svuotare completamente il catalogo? Tutte le canzoni verranno rimosse.')) {
+                songs = [];
                 localStorage.removeItem('pianosnap_songs_modified_at');
-                saveLocalSongs(false);
                 renderAdminDashboardData();
                 renderCatalog();
-                showToast('Catalogo ripristinato alle canzoni predefinite.', 'fa-rotate-left');
+                saveAllSongsToServerAndCloud([], true);
             }
         }
 
@@ -1722,53 +1858,25 @@
                 createdAt: existingSong ? (existingSong.createdAt || Date.now()) : Date.now()
             };
 
-            // 1. Cloud Firestore Save
-            try {
-                await setDoc(doc(db, 'songs', songId), songData, { merge: true });
-                showToast(editId ? 'Canzone aggiornata nel Cloud per tutti i visitatori!' : 'Nuova canzone pubblicata nel Cloud per tutti i visitatori!', 'fa-cloud-arrow-up');
-            } catch (firestoreErr) {
-                console.warn('Firestore write failed, saving locally:', firestoreErr);
-                showToast(editId ? 'Canzone aggiornata localmente.' : 'Nuova canzone aggiunta alla lista.', 'fa-circle-check');
-            }
-
-            // 2. Server API Sync (keeps server songs.json in sync)
-            try {
-                if (!editId) {
-                    await fetch('/api/songs', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                        },
-                        body: JSON.stringify(songData)
-                    });
-                } else {
-                    await fetch(`/api/songs/${songId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-admin-token': adminToken || 'ps_admin_session_auth_matrix_2026'
-                        },
-                        body: JSON.stringify(songData)
-                    });
-                }
-            } catch (srvErr) {
-                console.warn('Server sync notice:', srvErr);
-            }
-
-            // 3. Update local array: Append to existing list, NEVER overwrite!
+            // Update local array: Append to existing list, NEVER overwrite!
             if (editId) {
                 const idx = songs.findIndex(s => s.id === editId);
                 if (idx !== -1) {
                     songs[idx] = songData;
+                } else {
+                    songs = [songData, ...songs];
                 }
             } else {
-                // Ensure all existing songs are preserved, prepend the new song
+                // Ensure all existing songs (including imported JSON songs) are kept, add new song!
                 songs = [songData, ...songs.filter(s => s.id !== songId)];
             }
-            saveLocalSongs(true);
+
+            // Render immediately
             renderAdminDashboardData();
             renderCatalog();
+
+            // Save full catalog (all imported songs + newly added song) to Server and Cloud
+            await saveAllSongsToServerAndCloud(songs, true);
 
             resetSongForm();
         }
@@ -1796,18 +1904,9 @@
 
             closeDeleteModal();
 
-            // 1. Cloud Firestore Delete
-            try {
-                await deleteDoc(doc(db, 'songs', id));
-                showToast('Canzone eliminata dal Cloud per tutti i visitatori.', 'fa-trash');
-            } catch (err) {
-                console.warn('Firestore delete failed, falling back locally:', err);
-                songs = songs.filter(s => s.id !== id);
-                saveLocalSongs();
-                renderAdminDashboardData();
-                renderCatalog();
-                showToast('Canzone eliminata.', 'fa-trash');
-            }
+            songs = songs.filter(s => s.id !== id);
+            renderAdminDashboardData();
+            renderCatalog();
 
             // If deleted song is current selected song, clear it
             if (currentSong && currentSong.id === id) {
@@ -1819,6 +1918,8 @@
             if (editIdEl && editIdEl.value === id) {
                 resetSongForm();
             }
+
+            await saveAllSongsToServerAndCloud(songs, true);
         }
 
         // ==========================================
@@ -2246,6 +2347,7 @@
 
         // Export all handler functions to window so inline HTML attributes (onclick, oninput, etc.) work in ES Module
         Object.assign(window, {
+            handleManualSaveAdminChanges,
             handleImportSongsJson,
             handleSortChange,
             closeDeleteModal,

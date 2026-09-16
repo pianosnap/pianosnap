@@ -30,13 +30,13 @@ function getSongs() {
   try {
     const raw = fs.readFileSync(SONGS_FILE, 'utf-8');
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
   } catch (err) {
     console.error('Error reading songs file:', err);
   }
-  return INITIAL_SONGS;
+  return [];
 }
 
 function saveSongs(songs) {
@@ -77,6 +77,15 @@ app.get('/api/songs', (req, res) => {
   res.json({ success: true, songs });
 });
 
+app.post('/api/songs/save-all', (req, res) => {
+  const { songs: allSongs } = req.body || {};
+  if (!Array.isArray(allSongs)) {
+    return res.status(400).json({ success: false, error: 'Formato lista canzoni non valido.' });
+  }
+  saveSongs(allSongs);
+  res.json({ success: true, count: allSongs.length, songs: allSongs });
+});
+
 app.post('/api/songs/import', requireAdminAuth, (req, res) => {
   const { songs: importedSongs } = req.body || {};
   if (!Array.isArray(importedSongs)) {
@@ -87,14 +96,14 @@ app.post('/api/songs/import', requireAdminAuth, (req, res) => {
 });
 
 app.post('/api/songs', requireAdminAuth, (req, res) => {
-  const { title, artist, youtubeUrl, midiUrl = '', sheetUrl = '' } = req.body || {};
+  const { id: incomingId, title, artist, youtubeUrl, midiUrl = '', sheetUrl = '' } = req.body || {};
   if (!title || !artist || !youtubeUrl) {
     return res.status(400).json({ success: false, error: 'Titolo, artista e link YouTube sono obbligatori.' });
   }
 
   const songs = getSongs();
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const id = `${slug || 'song'}-${Date.now().toString().slice(-5)}`;
+  const id = incomingId || `${slug || 'song'}-${Date.now().toString().slice(-5)}`;
 
   const newSong = {
     id,
@@ -106,9 +115,9 @@ app.post('/api/songs', requireAdminAuth, (req, res) => {
     createdAt: Date.now()
   };
 
-  songs.unshift(newSong);
-  saveSongs(songs);
-  res.json({ success: true, song: newSong, songs });
+  const updatedSongs = [newSong, ...songs.filter(s => s.id !== id)];
+  saveSongs(updatedSongs);
+  res.json({ success: true, song: newSong, songs: updatedSongs });
 });
 
 app.put('/api/songs/:id', requireAdminAuth, (req, res) => {
