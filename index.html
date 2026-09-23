@@ -901,31 +901,54 @@
             writeBatch 
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // Firebase Configuration (Google Cloud / Firebase Free Tier)
-        const firebaseConfig = {
-            projectId: "wired-balancer-m7dgj",
-            appId: "1:872111048182:web:4799699552b1517466f3d7",
-            apiKey: "AIzaSyBxwmm8MmsBRsdNYV1tTuBUgj-javQZ6oU",
-            authDomain: "wired-balancer-m7dgj.firebaseapp.com",
-            storageBucket: "wired-balancer-m7dgj.firebasestorage.app",
-            messagingSenderId: "872111048182"
-        };
+        // Firebase App & Database References (loaded dynamically via /api/firebase-config or fallback)
+        let firebaseApp = null;
+        let db = null;
 
-        const firebaseApp = initializeApp(firebaseConfig);
-        const db = getFirestore(firebaseApp, "ai-studio-pianosnap-5f6210df-c01d-4e20-abd2-28f85b276205");
-
-        // Validate Connection to Firestore
-        async function testConnection() {
+        async function initFirebaseService() {
             try {
-                await getDocFromServer(doc(db, 'test', 'connection'));
-                console.log("Firebase Firestore connected successfully.");
-            } catch (error) {
-                if (error instanceof Error && error.message.includes('the client is offline')) {
-                    console.warn("Firestore client offline, falling back to local storage cache.");
+                let config = {
+                    projectId: "wired-balancer-m7dgj",
+                    appId: "1:872111048182:web:4799699552b1517466f3d7",
+                    apiKey: "",
+                    authDomain: "wired-balancer-m7dgj.firebaseapp.com",
+                    storageBucket: "wired-balancer-m7dgj.firebasestorage.app",
+                    messagingSenderId: "872111048182",
+                    firestoreDatabaseId: "ai-studio-pianosnap-5f6210df-c01d-4e20-abd2-28f85b276205"
+                };
+
+                try {
+                    const res = await fetch('/api/firebase-config');
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.config) {
+                            config = { ...config, ...data.config };
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch /api/firebase-config, using default config:', e);
                 }
+
+                if (config.apiKey) {
+                    firebaseApp = initializeApp(config);
+                    const dbId = config.firestoreDatabaseId || "ai-studio-pianosnap-5f6210df-c01d-4e20-abd2-28f85b276205";
+                    db = getFirestore(firebaseApp, dbId);
+
+                    try {
+                        await getDocFromServer(doc(db, 'test', 'connection'));
+                        console.log("Firebase Firestore connected successfully.");
+                    } catch (error) {
+                        if (error instanceof Error && error.message.includes('the client is offline')) {
+                            console.warn("Firestore client offline, falling back to local storage cache.");
+                        }
+                    }
+                } else {
+                    console.warn("Firebase apiKey not configured yet. Running in high-performance local/server mode.");
+                }
+            } catch (err) {
+                console.error("Firebase initialization failed:", err);
             }
         }
-        testConnection();
 
         const DEFAULT_SONGS = [];
         const DUMMY_IDS = new Set([
@@ -1021,6 +1044,7 @@
             // Show initial state in catalog while waiting for Firestore
             renderCatalog();
             checkRoute();
+            await initFirebaseService();
             initFirestoreListener();
         }
 
@@ -1226,6 +1250,12 @@
         // DATA SYNC WITH CLOUD FIRESTORE & LOCAL STORAGE
         // ==========================================
         function initFirestoreListener() {
+            if (!db) {
+                isInitialLoading = false;
+                renderCatalog();
+                if (adminToken) renderAdminDashboardData();
+                return;
+            }
             try {
                 const songsCol = collection(db, 'songs');
 

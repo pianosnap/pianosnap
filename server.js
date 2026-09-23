@@ -13,8 +13,71 @@ app.use(express.json());
 
 const DATA_DIR = path.join(__dirname, 'data');
 const SONGS_FILE = path.join(DATA_DIR, 'songs.json');
+const CONFIG_FILE = path.join(__dirname, 'firebase-applet-config.json');
+const ENV_FILE = path.join(__dirname, '.env');
+
+// Load environment variables from .env file if present
+if (fs.existsSync(ENV_FILE)) {
+  try {
+    const envContent = fs.readFileSync(ENV_FILE, 'utf-8');
+    envContent.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const idx = trimmed.indexOf('=');
+        if (idx > -1) {
+          const k = trimmed.slice(0, idx).trim();
+          const v = trimmed.slice(idx + 1).trim();
+          if (v) {
+            process.env[k] = v;
+          }
+        }
+      }
+    });
+  } catch (err) {
+    console.warn('Notice loading .env:', err);
+  }
+}
+
+function getEffectiveApiKey(cfgApiKey) {
+  return process.env.FIREBASE_API_KEY || cfgApiKey || '';
+}
 
 const INITIAL_SONGS = [];
+
+// Endpoint to securely provide Firebase public config without committing hardcoded secrets in source files
+app.get('/api/firebase-config', (req, res) => {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+      return res.json({
+        success: true,
+        config: {
+          projectId: cfg.projectId || process.env.FIREBASE_PROJECT_ID || 'wired-balancer-m7dgj',
+          appId: cfg.appId || process.env.FIREBASE_APP_ID || '1:872111048182:web:4799699552b1517466f3d7',
+          apiKey: getEffectiveApiKey(cfg.apiKey),
+          authDomain: cfg.authDomain || `${cfg.projectId || 'wired-balancer-m7dgj'}.firebaseapp.com`,
+          storageBucket: cfg.storageBucket || `${cfg.projectId || 'wired-balancer-m7dgj'}.firebasestorage.app`,
+          messagingSenderId: cfg.messagingSenderId || '872111048182',
+          firestoreDatabaseId: cfg.firestoreDatabaseId || 'ai-studio-pianosnap-5f6210df-c01d-4e20-abd2-28f85b276205'
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error reading firebase config file:', err);
+  }
+  return res.json({
+    success: true,
+    config: {
+      projectId: process.env.FIREBASE_PROJECT_ID || 'wired-balancer-m7dgj',
+      appId: process.env.FIREBASE_APP_ID || '1:872111048182:web:4799699552b1517466f3d7',
+      apiKey: getEffectiveApiKey(''),
+      authDomain: 'wired-balancer-m7dgj.firebaseapp.com',
+      storageBucket: 'wired-balancer-m7dgj.firebasestorage.app',
+      messagingSenderId: '872111048182',
+      firestoreDatabaseId: 'ai-studio-pianosnap-5f6210df-c01d-4e20-abd2-28f85b276205'
+    }
+  });
+});
 
 function ensureSongsFile() {
   if (!fs.existsSync(DATA_DIR)) {
